@@ -1,0 +1,22 @@
+{
+  "name": "personalfit",
+  "private": true,
+  "version": "0.2.0",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @personalfit/web",
+    "build": "npm run build -w @personalfit/web",
+    "lint": "npm run lint -w @personalfit/web",
+    "test": "npm run test -w @personalfit/web",
+    "test:e2e": "npm run test:e2e -w @personalfit/web",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:stop": "supabase stop"
+  },
+  "devDependencies": {
+    "supabase": "2.118.0"
+  }
+}

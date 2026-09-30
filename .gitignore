@@ -1,0 +1,42 @@
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependências, builds e caches
+node_modules/
+.pnpm-store/
+.npm-cache/
+.npm-cli/
+.build-tmp/
+.install-check/
+.playwright-browsers/
+pnpm-lock.yaml
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.cache/
+.turbo/
+.vite/
+playwright-report/
+test-results/
+
+# Editor e sistema operacional
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Supabase local e saídas operacionais
+supabase/.branches/
+supabase/.profiles/
+supabase/.temp/
+supabase/.versions/
+
+# Referência fornecida apenas para análise; não distribuir assets proprietários
+referencia/
