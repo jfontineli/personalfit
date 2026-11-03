@@ -1,6 +1,6 @@
 # Estado atual
 
-Atualizado em: 2026-09-29.
+Atualizado em: 2026-11-02.
 
 ## CONFIRMADO
 
@@ -17,13 +17,31 @@ Atualizado em: 2026-09-29.
 - Uma aplicação web React atende aluno e profissional em áreas separadas nesta fase.
 - As áreas mínimas `/login`, `/app`, `/app/alunos`, `/app/alunos/:id`, `/app/configuracoes`, `/aluno/inicio` e `/ativar` usam vínculos ativos e contexto de tenant. O diagnóstico técnico permanece em `/diagnostico`.
 - Os testes pgTAP de identidade e fundação técnica cobrem isolamento A/B, dois alunos do mesmo tenant, inativação, convite, associação ao Auth e negações por papel. O E2E de identidade passou com cadastro, edição, marca, seleção de tenant, URL de outro tenant e ativação.
+- Uma migration adicional implementa o fluxo local superadmin → criação de tenant e convite → ativação do primeiro personal → cadastro de aluno. O superadmin não recebe acesso privado ao novo tenant. A migration foi aplicada sem reset; 89 testes pgTAP passaram e o E2E específico percorreu a jornada completa.
+- A interface apresenta `tenant` como “espaço do personal”, explica o nome informado ao criar esse espaço, identifica a área do superadmin corretamente e usa rótulos em português para marca e status do aluno. Os nomes técnicos de tabelas e contratos permanecem inalterados.
+- O painel do superadmin lista espaços e o primeiro profissional, mostra ativação e acesso, e permite alterar tipo de plano, prazo, suspensão e reativação. A migration aditiva foi aplicada sem reset. RLS e RPCs bloqueiam dados de espaço suspenso ou vencido; reativar preserva os dados. A suíte de banco passou com 111 verificações e o E2E percorreu criação, edição de plano, ativação e suspensão.
+- A experiência do superadmin mostra resumo filtrável, busca por espaço/profissional/e-mail, cartões compactos com edição sob demanda, confirmação contextual antes da suspensão e próximo passo para copiar o convite. As telas de ativação distinguem criação da conta e confirmação do convite; quem já tem conta retorna ao convite após o login. O token permanece no fragmento da URL nesse retorno. Lint, TypeScript, build PWA, sete testes unitários e quatro E2E passaram após a revisão de UX.
+- Após limpeza autorizada do banco **local**, resta apenas o espaço do primeiro profissional, com plano Avaliação ativo e sem prazo. Foram preservadas também a conta de superadmin, a marca, o vínculo e o histórico desse espaço. Os cinco espaços de seed/teste e 17 contas Auth fictícias foram removidos. Executar `db:reset` novamente recriará os dados fictícios definidos no seed.
+- Em 2026-11-02, o e-mail da conta Auth do profissional desse espaço local, da identidade de login e do perfil foi alinhado ao e-mail do convite já utilizado. O ID da conta, a senha, o vínculo ativo e os dados do espaço foram preservados. A correção foi aplicada apenas aos dados locais, sem alterar migrations ou seed.
+- A área do personal passou a usar o padrão administrativo do painel: visão geral, resumo e busca de alunos, cadastro sob demanda e detalhe com ações de acesso separadas. A tela Marca usa seletores de cor com prévia e upload de logotipo PNG/JPG/WebP em bucket privado, limitado a 2 MB. A migration de Storage foi aplicada sem reset e o espaço local do Daniel foi preservado.
+- O convite de aluno agora apresenta prazo e link separados, permite copiar com confirmação visual ou abrir o compartilhamento do WhatsApp com mensagem pronta. O profissional escolhe o contato e confirma o envio no WhatsApp. Gerar outro convite exige confirmação porque invalida o anterior; o token não é armazenado em texto no banco.
+- O primeiro ciclo de treino foi implementado por cinco migrations aditivas, sem `db:reset` e sem remover os dados locais existentes: biblioteca de exercícios por tenant, rascunho por aluno, publicação imutável com snapshot de instruções/vídeo, atribuição, sessão e recibo de operação idempotente; vídeos MP4 ficam em bucket privado com leitura só pelo profissional ou aluno atribuído e não podem ser apagados enquanto uma versão publicada os referencia. A quinta migration impede registrar séries acima do prescrito ou duplicadas. O plano de atendimento do aluno guarda nome, datas e estado separadamente do plano SaaS do tenant; ainda não há cobrança nem bloqueio automático por esse cadastro.
+- A PWA do aluno carrega a prescrição ao abrir conectado, guarda sessão e operações no IndexedDB, permite lançar séries e recarregar offline, e reenvia operações ao voltar online. A interface mostra pendência e confirmação. O E2E isolado validou publicação, upload e leitura de vídeo, registro offline, recarga offline e confirmação após reconexão. O pgTAP da nova área passou com 44 verificações de RLS, isolamento A/B/A1/A2, limites das séries, preservação da versão e idempotência; lint, TypeScript, nove testes Vitest, build PWA e três E2E isolados passaram.
+- Em 2026-11-02, duas migrations aditivas passaram a preservar orientação geral, observação individual, descanso e rótulo de cada série na versão publicada; o aluno pode registrar RIR opcional. Um rascunho marcado para revisão não pode ser publicado pela interface nem pela RPC. O pgTAP passou com 49 verificações e o E2E de treino confirmou os campos novos e o RIR após sincronização offline.
+- A aba TREINO da referência fornecida foi lida em 2026-11-02. Seus cinco dias e 36 exercícios foram inicialmente cadastrados como rascunho local para o aluno existente do primeiro espaço. Dia, ordem, nomes, séries, repetições e descanso foram conferidos 36/36 contra a origem. A planilha contradizia a própria observação sobre o agachamento; o usuário definiu Agachamento Livre sem orientação específica, e o texto conflitante foi retirado do rascunho. O profissional vinculado ao espaço marcou a revisão como concluída e publicou a versão 1 com os cinco dias e 36 exercícios; há uma atribuição ao aluno. Os 36 links de vídeo da referência não foram incorporados; a biblioteca do espaço aguarda vídeos próprios. A aba DIETA foi analisada como contexto, mas não importada, pois o editor de dieta ainda não existe e contém orientações clínicas/medicamentos que exigem validação humana.
+- O editor profissional do treino apresenta uma visão geral e navegação por dia, mostra apenas os exercícios do dia selecionado em cartões resumidos e abre os campos de um exercício por vez. Orientações gerais ficam recolhidas; a ação de publicar informa que inclui todos os dias. A troca de dia preserva alterações no estado do rascunho até salvar.
+- O personal pode alterar a ordem dos dias e dos exercícios no rascunho; a ordem publicada aparece igual para o aluno. A área do aluno mostra uma semana de calendário por vez, destaca o próximo dia ainda não concluído e apresenta somente os exercícios do dia selecionado, recolhidos até a abertura. Cada sessão nova guarda dia e início da semana, sem mudar versões ou sessões antigas. A fila pendente volta a ser mostrada após recarga offline. As migrations aditivas de dia/semana e autorização prévia foram aplicadas sem reset; 58 verificações pgTAP, 10 testes Vitest, lint, build PWA e o E2E de treino passaram.
 
 ## DECISÃO APROVADA
 
 - Stack: React + TypeScript, PWA mobile first, Supabase Auth/Storage, PostgreSQL, IndexedDB, fila de sincronização e Cache Storage.
 - Monorepo modular, multi-tenancy e white-label desde o início; sem Spring Boot inicialmente.
 - Prescrição publicada é versionada e execução mantém sua versão; histórico permanece após edição.
+- A visão do produto é centrada no profissional e em sua identidade por tenant. Sua biblioteca de exercícios, vídeos e instruções tem prioridade sobre eventual conteúdo global; ele cria os treinos, sem sugestão ou geração automática no MVP. Dieta e acompanhamento integram a visão, com editor estruturado de dieta adiado.
+- A referência em `referencia/` é base funcional da experiência do personal, sem transferência de código, marca, planilhas ou ofertas próprias daquele app. O fluxo comercial começa no superadmin, segue pelo personal e chega ao aluno.
+- O aluno não terá botão de download offline. O aplicativo disponibilizará automaticamente a prescrição previamente carregada para consulta e lançamentos locais sem rede, com sincronização posterior e estado visível. Vídeos de instrução serão consultados online no MVP; a referência possui um recurso próprio de download de vídeos que não será reproduzido.
 - Escopo e adiamentos estão em `PROJECT_CONTEXT.md`.
+- O ADR 0014 define GitHub para o código, Cloudflare Pages para a aplicação e Supabase Cloud para banco/Auth/API/Storage. O primeiro ambiente remoto será de testes; produção terá banco separado. A implantação ainda não ocorreu.
 
 ## HIPÓTESE
 
@@ -32,11 +50,15 @@ Atualizado em: 2026-09-29.
 
 ## PENDENTE
 
-- Aprovação humana para iniciar a fase posterior de produto.
 - Definição do primeiro tenant real, nome comercial e identidade de marca.
-- Escolha da hospedagem web e região dos serviços.
-- Treino, prescrição, avaliação, contratos de sincronização de negócio, políticas RLS para entidades futuras e implantação.
-- Entrega automática de convites, recuperação de convite, política de troca de e-mail e operações administrativas de SUPER_ADMIN com servidor e auditoria dedicada.
+- Seleção efetiva da região dos serviços na criação do projeto remoto.
+- Criação do projeto Supabase remoto, configuração do Cloudflare Pages e validação do app no celular. A região São Paulo ainda precisa ser selecionada na criação do projeto.
+- Execução completa de `db:test` sem recriar o banco local: as suítes antigas dependem dos dados fictícios do seed, removidos por solicitação do usuário. O teste do primeiro ciclo de treino continua passando no banco atual; ver `TESTING.md`.
+- Ampliar a execução para placa, timer de descanso, exercício pulado, frequência e avaliação. Tempo por série, carga opcional e encerramento parcial explícito já estão implementados; frequência e correção retroativa ainda não.
+- Definir conflito entre dispositivos, retenção dos recibos de idempotência, limite/validação binária dos vídeos, recuperação de operações que exigem atenção, backups, implantação e monitoramento.
+- Definir as regras comerciais do plano de atendimento do aluno; o cadastro inicial não concede nem bloqueia módulos automaticamente.
+- Adicionar vídeos próprios do profissional quando disponíveis; mídia da referência não foi importada.
+- Entrega automática/reenvio de convites, política de troca de e-mail, MFA, cobrança/renovação e gestão administrativa detalhada de usuários. Criação, listagem e controle básico de acesso dos espaços já existem localmente.
 
 ## NECESSITA VALIDAÇÃO HUMANA
 
@@ -44,7 +66,28 @@ Atualizado em: 2026-09-29.
 - Campos exatos das medidas básicas e quem poderá registrá-las.
 - Política de acesso excepcional do suporte da plataforma.
 - Orçamento operacional e data do piloto.
+- Tipos, serviços e efeito do vencimento do plano contratado pelo aluno; comportamento de operações feitas offline antes da inativação ou suspensão.
 
 ## Próximo marco autorizado
 
-A Fase 3 de identidade, tenant, papéis e autorização de negócio foi implementada e validada localmente. Funcionalidades de treino e fases posteriores aguardam aprovação.
+**CONFIRMADO EM 2026-11-02, USABILIDADE DA EXECUÇÃO:** a migration `20261102040000_workout_cycle_and_execution.sql` foi aplicada no Supabase local sem reset. O personal define início e duração de 1 a 52 semanas antes de publicar nova versão, escolhe repetições ou tempo para cada exercício e pode escrever uma orientação essencial destacada. A versão publicada preserva esses campos. O aluno navega por semana do ciclo e por dia, registra segundos ou repetições, carga opcional e RIR opcional. Um dia só pode ser concluído quando todas as séries prescritas estiverem registradas; encerramento parcial é explícito e terminal. O servidor valida unidade, dia, semana e completude; versões antigas continuam intactas, com semana de calendário. A migration aditiva `20261102050000_legacy_zero_reps_compat.sql` preserva o reenvio de operações antigas com zero repetição. A PWA em desenvolvimento remove registros antigos de service worker para evitar CSS desatualizado. Lint, 10 testes Vitest, build, 68 verificações pgTAP e E2E de publicação, execução offline, tempo sem carga e treino parcial passaram. **PENDENTE:** prévia da experiência do aluno antes da publicação foi excluída por decisão do usuário; o treino real já publicado pelo Daniel não foi republicado nem teve início/duração inferidos.
+
+**CONFIRMADO EM 2026-11-02, IDENTIDADE DO ALUNO:** o início do aluno usa nome, logotipo e cor principal do tenant autorizado no cabeçalho, com contraste calculado para ações principais. WhatsApp e Instagram aparecem como links quando a configuração tem formato válido. O título genérico “Área do aluno” e dados repetidos foram removidos. As orientações gerais permanecem acessíveis, recolhidas por padrão com aviso para leitura antes do treino; a navegação pelos dias não quebra em várias linhas. A captura de E2E em largura de 390 px foi inspecionada e removida após a revisão. Lint, 10 testes Vitest, build e E2E isolado de treino passaram; não houve mudança de banco nem republicação do treino real. **PENDENTE:** nome, ícone e manifest PWA personalizados por tenant, além de foto de perfil do personal.
+
+**CONFIRMADO EM 2026-11-02, PREPARAÇÃO E AVANÇO:** o editor permite definir cada exercício como série de treino ou preparação sem carga/RIR. O estilo vai ao snapshot de novas versões; a migration `20261102060000_preparation_tracking.sql` rejeita carga/RIR para preparações novas no servidor. Alongamentos de versões antigas são apresentados como preparação por compatibilidade, sem reescrever a versão publicada. O aluno registra tempo ou repetições por etapa e, após salvar a última etapa/série do exercício, a interface abre e posiciona o próximo exercício pendente. A migration foi aplicada localmente sem reset; o treino real do aluno não foi republicado.
+
+**CONFIRMADO EM 2026-11-02, REGISTRO GUIADO:** a tela do aluno apresenta apenas a próxima série ou etapa pendente de cada exercício aberto, com progresso visível. Registros feitos ficam em um resumo compacto e podem ser corrigidos; a correção não provoca avanço de exercício. O campo opcional RIR usa a pergunta “Repetições que sobrariam”. Após recarga offline, o primeiro exercício pendente volta aberto. Não houve mudança de schema, contrato de sincronização nem republicação do treino real.
+
+**CONFIRMADO EM 2026-11-02, ORGANIZAÇÃO DO PERSONAL:** a biblioteca própria apresenta grupos principais editáveis, busca, filtro e cartões compactos; a edição e o envio de vídeo ficam recolhidos. Vídeo permanece opcional no cadastro e na publicação. A migration aditiva `20261102070000_exercise_groups.sql` atribuiu grupos iniciais aos 36 exercícios locais e preservou a versão publicada e as sessões. O seletor do editor de treino também apresenta exercícios por grupo. O detalhe do aluno usa abas Cadastro, Atendimento e Treino; os painéis permanecem montados ao trocar de aba para preservar o rascunho ainda não salvo. O vídeo de referência mostrou a lista longa anterior; nenhuma mídia ou marca dele foi incorporada.
+
+**CONFIRMADO EM 2026-11-02, VÍDEO NA BIBLIOTECA:** cadastro e edição de exercício mostram o vídeo no mesmo formulário, com um único botão de salvar. O profissional escolhe sem vídeo, link do YouTube ou MP4 privado; na edição pode manter o vídeo atual. A seleção exibe apenas o campo correspondente. Links do YouTube são validados e normalizados; abrem online e não ocupam o Storage do PersonalFit. O snapshot já publicado não é reescrito. Lint, 12 testes unitários, build e E2E isolado passaram.
+
+**CONFIRMADO EM 2026-11-02, ENTREGA DO VÍDEO AO ALUNO:** o link do exercício “Crucifixo Inclinado no Cross” está salvo na biblioteca local, mas a versão 1 já publicada guarda `videoUrl` vazio. Pela decisão corrigida no ADR 0013, `student_exercise_videos` entrega ao aluno autorizado o vídeo atual desse exercício ao abrir o treino com internet, sem republicar. A versão 1 e as sessões em andamento permanecem imutáveis quanto à prescrição. A migration `20261102100000_live_exercise_media.sql` foi aplicada no Supabase local sem reset; o teste pgTAP passou com 82 verificações, e o E2E confirmou vídeo atualizado ao aluno com snapshot antigo intacto. O treino real não foi republicado.
+
+**CONFIRMADO EM 2026-11-02, REPRODUÇÃO NO TREINO:** links do YouTube validados abrem em um modal sobre o exercício, usando player incorporado em modo de privacidade aprimorada; MP4 privado usa o mesmo modal. Fechar pelo botão ou Esc remove o player e devolve o foco ao botão do exercício, sem trocar de rota. O vídeo só é carregado após o toque e continua online. Links externos legados que não são do YouTube mantêm abertura externa. Lint, 12 testes unitários, build e E2E isolado passaram.
+
+**CONFIRMADO EM 2026-11-02, AJUSTE DE GRUPOS:** duas migrations complementares corrigem uma classificação inicial de ombro e concedem escrita da nova coluna somente ao papel autenticado, sob a RLS existente. O primeiro E2E identificou a ausência do grant de coluna; ele foi corrigido antes da validação final.
+
+**CONFIRMADO EM 2026-11-02, NAVEGAÇÃO DO ALUNO PARA O PERSONAL:** a aba aberta no detalhe do aluno aparece no parâmetro `aba` da URL e permanece selecionada após recarga, sem perder os dados do formulário ou do rascunho ao alternar abas. Cadastro é a aba padrão.
+
+A base de identidade e o primeiro ciclo de treino foram implementados e validados localmente. A ampliação da execução, as regras comerciais do atendimento, avaliação, dieta e implantação permanecem pendentes.

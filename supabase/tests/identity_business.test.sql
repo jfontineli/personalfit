@@ -6,9 +6,9 @@ select no_plan();
 select is((select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relname in ('user_profiles','platform_admins','professionals','students','student_internal_notes','student_invitations','audit_events') and c.relrowsecurity), 7::bigint, 'every new private table has RLS');
 select is((select count(*) from public.students where user_id is null), 1::bigint, 'student may exist before account');
-select is((select count(*) from public.professionals), 2::bigint, 'fictional professionals seeded');
-select is((select count(*) from public.user_profiles), 6::bigint, 'profiles created for seeded identities');
-select is((select count(*) from public.platform_admins), 0::bigint, 'no platform admin seeded with tenant access');
+select is((select count(*) from public.professionals where user_id in ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2')), 2::bigint, 'fictional professionals seeded');
+select is((select count(*) from public.user_profiles where user_id in ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2','cccccccc-cccc-4ccc-8ccc-ccccccccccc3','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb4')), 6::bigint, 'profiles created for seeded identities');
+select is((select count(*) from public.platform_admins where user_id = 'cccccccc-cccc-4ccc-8ccc-ccccccccccc3'), 0::bigint, 'seeded unlinked user is not platform admin');
 
 set local role anon;
 select throws_ok($$select count(*) from public.students$$, '42501', null, 'anon cannot read students');
@@ -16,7 +16,7 @@ select throws_ok($$select public.claim_student_invite('0000000000000000000000000
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', true);
-select is((select count(*) from public.students), 3::bigint, 'professional A reads A students');
+select is((select count(*) from public.students where id in ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-2222-4222-8222-222222222222','aaaaaaaa-3333-4333-8333-333333333333')), 3::bigint, 'professional A reads seeded A students');
 select is((select count(*) from public.students where tenant_id = 'bbbbbbbb-0000-4000-8000-000000000002'), 0::bigint, 'professional A cannot read B student by tenant id');
 select is((select count(*) from public.students where id = 'bbbbbbbb-1111-4111-8111-111111111111'), 0::bigint, 'professional A cannot read B student by known id');
 select results_eq($$update public.students set full_name = 'intrusion' where id = 'bbbbbbbb-1111-4111-8111-111111111111' returning 1$$, $$select 1 where false$$, 'professional A cannot alter B student');

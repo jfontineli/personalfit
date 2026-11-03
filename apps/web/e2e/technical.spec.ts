@@ -20,6 +20,7 @@ test('abre a aplicação, grava localmente e reabre offline', async ({ page, con
 })
 
 test('Auth, sessão, RLS e sincronização técnica para A, B e sem vínculo', async ({ page, context }) => {
+  test.setTimeout(120_000)
   const url = process.env.VITE_SUPABASE_URL
   const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

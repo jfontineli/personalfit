@@ -12,5 +12,11 @@ Cada ADR registra contexto, decisão, alternativas e consequências. Uma decisã
 | [0006](0006-monorepo.md) | Monorepo modular | DECISÃO APROVADA |
 | [0007](0007-white-label.md) | White-label por tenant | DECISÃO APROVADA |
 | [0008](0008-identity-roles-invitations.md) | Identidade, papéis e ativação de aluno | CONFIRMADO na Fase 3 |
+| [0009](0009-professional-centric-white-label.md) | Produto centrado no profissional e white-label | DECISÃO APROVADA |
+| [0010](0010-platform-onboarding.md) | Entrada de profissionais pela plataforma | CONFIRMADO localmente |
+| [0011](0011-platform-plan-and-access.md) | Plano e acesso administrativo por espaço | CONFIRMADO localmente |
+| [0012](0012-workout-cycle-and-partial-execution.md) | Ciclo prescrito e execução parcial | CONFIRMADO localmente |
+| [0013](0013-live-exercise-media.md) | Mídia atual da biblioteca em treinos publicados | CONFIRMADO localmente |
+| [0014](0014-cloudflare-pages-supabase-hosting.md) | Cloudflare Pages e Supabase Cloud | DECISÃO APROVADA; implantação pendente |
 
-Todos foram registrados em 2026-09-29. A aprovação da arquitetura na Fase 0 não significa que a implementação já exista.
+Os ADRs 0001 a 0008 foram registrados em 2026-09-29; os ADRs 0009 a 0011, em 2026-09-30; os ADRs 0012 a 0014, em 2026-11-02. A aprovação da arquitetura não significa que a implementação já exista.

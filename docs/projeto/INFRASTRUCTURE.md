@@ -2,7 +2,7 @@
 
 ## Estado
 
-**CONFIRMADO:** `supabase/config.toml` configura o stack local via CLI/Docker; `.github/workflows/ci.yml` executa instalação, lint, testes de frontend e build. `infra/` permanece sem deploy. Não há projeto remoto, região, domínio ou hospedagem configurados.
+**CONFIRMADO:** `supabase/config.toml` configura o stack local via CLI/Docker; `.github/workflows/ci.yml` executa instalação, lint, testes de frontend e build. `infra/` permanece sem deploy. Não há projeto Supabase remoto, domínio ou hospedagem web configurados.
 
 **CONFIRMADO NA FASE 2.1:** o stack local subiu com PostgreSQL em `127.0.0.1:54322`, API/Auth/Storage em `127.0.0.1:54321`, Studio em `127.0.0.1:54323` e caixa de e-mail local em `127.0.0.1:54324`. Auth, Storage e Studio responderam HTTP 200; o Vector de logs reinicia neste host e requer diagnóstico operacional separado.
 
@@ -10,11 +10,11 @@
 
 **DECISÃO APROVADA:** PWA React, Supabase Auth/Storage e PostgreSQL. Ambientes e credenciais devem ser separados. Variáveis públicas do frontend não incluem chaves privilegiadas.
 
-**HIPÓTESE:** usar ambientes de desenvolvimento, homologação e produção proporcionais ao custo do primeiro cliente. A hospedagem da PWA pode ser estática, desde que suporte HTTPS, rotas, cabeçalhos, atualização do service worker e domínio futuro.
+**DECISÃO APROVADA (ADR 0014):** GitHub guarda o monorepo; Cloudflare Pages servirá o frontend React/PWA e Supabase Cloud servirá PostgreSQL, Auth, API e Storage. O primeiro ambiente remoto será de testes, preferencialmente em São Paulo, com produção em projeto Supabase separado. A configuração do build usará somente URL e chave publicável do ambiente. Planos gratuitos são ponto de partida para testes; disponibilidade e backups para clientes reais exigem revisão antes do piloto.
 
 ## Preparação para produção
 
-**PENDENTE:** selecionar hospedagem, região do Supabase, estratégia de branches/ambientes, domínio inicial, certificados, convites/e-mail, monitoramento de erros, métricas de fila, backups de banco e objetos, retenção, restauração ensaiada, limites de custo e política de incidentes.
+**PENDENTE:** criar e validar projeto Supabase remoto, confirmar a região escolhida, configurar Cloudflare Pages e variáveis de build, definir estratégia de branches/ambientes, domínio inicial, certificados, convites/e-mail, monitoramento de erros, métricas de fila, backups de banco e objetos, retenção, restauração ensaiada, limites de custo e política de incidentes. Nunca aplicar o seed fictício de desenvolvimento em produção.
 
 ## White-label e domínios
 

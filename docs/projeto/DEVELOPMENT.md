@@ -18,7 +18,7 @@
 
 ## Convenções ainda abertas
 
-**CONFIRMADO:** npm workspaces, Vite, `idb`, ESLint, Vitest, Playwright e CI GitHub Actions foram escolhidos para a base técnica. Ainda não há roteador porque existe apenas uma tela.
+**CONFIRMADO:** npm workspaces, Vite, `idb`, ESLint, Vitest, Playwright e CI GitHub Actions foram escolhidos para a base técnica. A aplicação já tem áreas distintas, mas ainda seleciona a tela pelo caminho em `IdentityApp`, sem biblioteca de roteamento.
 
 ## Ambientes e configuração
 
@@ -28,7 +28,7 @@
 4. Execute `npm run dev` para desenvolvimento. Para PWA/offline, execute `npm run build` e `npx vite preview --host 127.0.0.1` em `apps/web`.
 5. Execute `npm run lint` e `npm run test`. Instale o navegador com `npx playwright install chromium` antes de `npm run test:e2e`. Para o E2E completo, mantenha Supabase local ativo e passe `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` e `SUPABASE_SERVICE_ROLE_KEY` somente ao processo de teste. Obtenha os valores com `npx supabase status -o env`; a chave de serviço nunca entra em `.env.local` nem em variável `VITE_`.
 
-O seed contém identidades sem senha, usadas apenas para RLS. Para login manual local, crie uma conta técnica no Supabase Studio e use o formulário da aplicação; ela não recebe vínculo automaticamente. HOMOLOG e PROD futuros usam as mesmas variáveis públicas com valores próprios e segredos somente no ambiente servidor.
+O seed contém identidades sem senha, usadas apenas para RLS. Para testar o fluxo de entrada, crie uma conta Auth fictícia local e conceda a ela `platform_admins` somente no ambiente local; entre em `/admin`, crie o tenant/convite e ative o personal pelo link exibido. O personal poderá cadastrar e convidar aluno pela interface. Contas criadas diretamente por ferramenta administrativa são apenas preparação de teste, não o fluxo do produto. HOMOLOG e PROD futuros usam as mesmas variáveis públicas com valores próprios e segredos somente no ambiente servidor.
 
 **CONFIRMADO NESTE HOST:** `db:start`, `db:reset` e `db:test` passaram depois de iniciar o Docker Desktop. O disco virtual do Docker permanece em C:, com espaço livre limitado; o cache de build Docker foi limpo sem remover imagens ou volumes. Se C: voltar a encher, investigue antes de limpar dados persistentes.
 
