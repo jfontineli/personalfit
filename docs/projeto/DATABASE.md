@@ -51,4 +51,6 @@
 
 **PENDENTE:** escolher plano Supabase, periodicidade, retenção, cópia de objetos do Storage e ensaio de restauração. Backup do banco e backup dos arquivos são necessidades distintas.
 
+**CONFIRMADO NA CÓPIA DE TESTE (2026-11-02):** as 21 migrations atuais foram aplicadas ao Supabase Cloud de teste em São Paulo. Dados atuais de `public`, `auth.users` e `auth.identities` foram copiados preservando identificadores, vínculos, versões e sessões de treino; 4 hashes de senha e 4 e-mails confirmados estão presentes. Sessões/tokens de Auth não foram copiados. O único logotipo privado foi enviado ao bucket remoto e conferido por download e SHA-256. O backup local pré-cópia está em diretório temporário ignorado; não constitui política de backup de produção.
+
 **NECESSITA VALIDAÇÃO HUMANA:** prazo de retenção e política de exclusão/exportação de dados pessoais.

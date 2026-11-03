@@ -20,7 +20,7 @@
 - `infra/`: futura configuração operacional.
 - `referencia/`: material fornecido para estudo funcional. Não é código, conteúdo ou identidade visual do produto e está excluído do Git.
 
-**Hospedagem planejada:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). Cloudflare Pages servirá a aplicação; Supabase Cloud hospedará banco, Auth, API e Storage em ambientes separados de teste e produção. A publicação remota ainda depende de criar e configurar esses serviços. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md).
+**Hospedagem:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). O Supabase Cloud de teste já recebeu schema, contas e dados locais. Cloudflare Pages servirá a aplicação após conectar este repositório GitHub e configurar as duas variáveis públicas de build; produção terá banco separado. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md) e [INFRASTRUCTURE.md](docs/projeto/INFRASTRUCTURE.md).
 
 ## Execução local
 

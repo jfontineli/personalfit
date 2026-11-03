@@ -1,6 +1,6 @@
 # Estado atual
 
-Atualizado em: 2026-11-02.
+Atualizado em: 2026-11-03.
 
 ## CONFIRMADO
 
@@ -31,6 +31,8 @@ Atualizado em: 2026-11-02.
 - A aba TREINO da referência fornecida foi lida em 2026-11-02. Seus cinco dias e 36 exercícios foram inicialmente cadastrados como rascunho local para o aluno existente do primeiro espaço. Dia, ordem, nomes, séries, repetições e descanso foram conferidos 36/36 contra a origem. A planilha contradizia a própria observação sobre o agachamento; o usuário definiu Agachamento Livre sem orientação específica, e o texto conflitante foi retirado do rascunho. O profissional vinculado ao espaço marcou a revisão como concluída e publicou a versão 1 com os cinco dias e 36 exercícios; há uma atribuição ao aluno. Os 36 links de vídeo da referência não foram incorporados; a biblioteca do espaço aguarda vídeos próprios. A aba DIETA foi analisada como contexto, mas não importada, pois o editor de dieta ainda não existe e contém orientações clínicas/medicamentos que exigem validação humana.
 - O editor profissional do treino apresenta uma visão geral e navegação por dia, mostra apenas os exercícios do dia selecionado em cartões resumidos e abre os campos de um exercício por vez. Orientações gerais ficam recolhidas; a ação de publicar informa que inclui todos os dias. A troca de dia preserva alterações no estado do rascunho até salvar.
 - O personal pode alterar a ordem dos dias e dos exercícios no rascunho; a ordem publicada aparece igual para o aluno. A área do aluno mostra uma semana de calendário por vez, destaca o próximo dia ainda não concluído e apresenta somente os exercícios do dia selecionado, recolhidos até a abertura. Cada sessão nova guarda dia e início da semana, sem mudar versões ou sessões antigas. A fila pendente volta a ser mostrada após recarga offline. As migrations aditivas de dia/semana e autorização prévia foram aplicadas sem reset; 58 verificações pgTAP, 10 testes Vitest, lint, build PWA e o E2E de treino passaram.
+- Em 2026-11-02, o projeto Supabase Cloud **de teste** em São Paulo recebeu as 21 migrations e uma cópia dos dados atuais do PostgreSQL local, sem executar o seed ou recriar o banco local. A conferência remota encontrou 4 contas Auth com hash de senha e e-mail confirmado, 1 espaço, 1 profissional, 1 aluno, 36 exercícios, 1 versão publicada e 2 sessões. Não há vínculos órfãos nas relações verificadas e nenhuma tabela pública está com RLS desligada. O logotipo privado foi enviado ao Storage remoto e o download conferiu com o arquivo local por SHA-256. O login no aplicativo remoto ainda não foi testado.
+- Em 2026-11-03, lint, 12 testes unitários e build PWA passaram com a URL e a chave publicável do Supabase remoto. O bundle contém a chave pública esperada e nenhuma chave privilegiada exata do projeto. Auth remoto respondeu HTTP 200; uma consulta anônima de alunos recebeu HTTP 401. O Cloudflare Pages ainda precisa ser criado e conectado ao GitHub; `.node-version` define Node 24 para o build remoto.
 
 ## DECISÃO APROVADA
 
@@ -41,7 +43,7 @@ Atualizado em: 2026-11-02.
 - A referência em `referencia/` é base funcional da experiência do personal, sem transferência de código, marca, planilhas ou ofertas próprias daquele app. O fluxo comercial começa no superadmin, segue pelo personal e chega ao aluno.
 - O aluno não terá botão de download offline. O aplicativo disponibilizará automaticamente a prescrição previamente carregada para consulta e lançamentos locais sem rede, com sincronização posterior e estado visível. Vídeos de instrução serão consultados online no MVP; a referência possui um recurso próprio de download de vídeos que não será reproduzido.
 - Escopo e adiamentos estão em `PROJECT_CONTEXT.md`.
-- O ADR 0014 define GitHub para o código, Cloudflare Pages para a aplicação e Supabase Cloud para banco/Auth/API/Storage. O primeiro ambiente remoto será de testes; produção terá banco separado. A implantação ainda não ocorreu.
+- O ADR 0014 define GitHub para o código, Cloudflare Pages para a aplicação e Supabase Cloud para banco/Auth/API/Storage. O banco e o Storage do primeiro ambiente remoto de testes receberam os dados locais; frontend e domínio ainda não foram concluídos. Produção terá projeto Supabase separado.
 
 ## HIPÓTESE
 
@@ -51,8 +53,8 @@ Atualizado em: 2026-11-02.
 ## PENDENTE
 
 - Definição do primeiro tenant real, nome comercial e identidade de marca.
-- Seleção efetiva da região dos serviços na criação do projeto remoto.
-- Criação do projeto Supabase remoto, configuração do Cloudflare Pages e validação do app no celular. A região São Paulo ainda precisa ser selecionada na criação do projeto.
+- Confirmar a leitura do logotipo remoto com uma conta vinculada e validar o login remoto do superadmin, profissional e aluno. As sessões locais existentes não são transferíveis entre projetos; cada conta precisará entrar novamente.
+- Criação do Cloudflare Pages com integração GitHub, configuração das variáveis públicas de build, rotas de Auth, domínio próprio quando houver e validação do app no celular.
 - Execução completa de `db:test` sem recriar o banco local: as suítes antigas dependem dos dados fictícios do seed, removidos por solicitação do usuário. O teste do primeiro ciclo de treino continua passando no banco atual; ver `TESTING.md`.
 - Ampliar a execução para placa, timer de descanso, exercício pulado, frequência e avaliação. Tempo por série, carga opcional e encerramento parcial explícito já estão implementados; frequência e correção retroativa ainda não.
 - Definir conflito entre dispositivos, retenção dos recibos de idempotência, limite/validação binária dos vídeos, recuperação de operações que exigem atenção, backups, implantação e monitoramento.
