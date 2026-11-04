@@ -30,7 +30,7 @@ Este arquivo não chama de dívida algo que ainda não foi implementado. Ele reg
 | White-label ampliado | PENDENTE | Cores, contatos e upload privado de logo existem; ampliar para foto, demais elementos e cache sem misturar tenants |
 | Autoria de treinos | DECISÃO APROVADA | O profissional cria a prescrição; não incluir sugestão ou montagem automática no MVP |
 | Subdomínio/domínio próprio | DECISÃO APROVADA: adiado | Quando plano comercial exigir |
-| Implantação remota | PENDENTE | Criar Supabase de testes e Cloudflare Pages conforme ADR 0014; validar migrations, RLS, Auth, Storage, rotas e PWA no celular antes de usar dados reais |
+| Implantação remota | CONFIRMADO ambiente de teste; validação pendente | Supabase Cloud e Cloudflare Pages recebem o código atual; validar login/RLS autenticados, Storage e PWA no celular antes de usar dados reais. Corrigir o gatilho GitHub → Cloudflare, que não publicou o commit `9d5ace7` automaticamente |
 | Fixtures pgTAP dependentes do seed | PENDENTE | Tornar os testes de banco autossuficientes ou executá-los em ambiente descartável com seed, sem resetar o banco local preservado |
 | Dieta estruturada | Primeiro fluxo e E2E CONFIRMADOS localmente | Validar CRN e conteúdo por humano, troca/revogação do parceiro, vigência, conflitos entre dispositivos e consentimento de compartilhamento; ver ADR 0015 |
 | Fotos corporais | DECISÃO APROVADA: adiadas | Após política de privacidade e storage |

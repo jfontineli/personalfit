@@ -1,7 +1,7 @@
 # ADR 0014 — Hospedagem web e banco gerenciado
 
 - Data: 2026-11-02
-- Status: **DECISÃO APROVADA**, implantação pendente
+- Status: **DECISÃO APROVADA**; ambiente remoto de teste publicado em 2026-11-04, produção pendente
 
 ## Contexto
 
@@ -16,4 +16,4 @@ Manter um monorepo com frontend em `apps/web/` e backend declarativo em `supabas
 - O deploy do frontend e as migrations do banco são processos separados, com configuração por ambiente.
 - A hospedagem estática deve entregar as rotas da SPA e os recursos da PWA sob HTTPS.
 - Um projeto gratuito pode pausar por inatividade; disponibilidade e backups de produção exigem plano e operação adequados.
-- **PENDENTE:** criar os projetos remotos, configurar variáveis públicas no Cloudflare Pages, aplicar migrations sem seed fictício de desenvolvimento, validar Auth/Storage/RLS, configurar domínio e testar a PWA no celular.
+- **CONFIRMADO NO AMBIENTE DE TESTE:** Supabase Cloud e Cloudflare Pages criados, migrations aplicadas sem seed, frontend publicado com URL e chave publicável. **PENDENTE:** validar Auth/Storage/RLS com sessões remotas, corrigir o deploy automático GitHub → Cloudflare, configurar domínio próprio quando houver e testar a PWA no celular.
