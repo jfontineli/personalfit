@@ -2,7 +2,7 @@
 
 **DECISÃO APROVADA:** PersonalFit é o nome temporário de um produto SaaS para profissionais de treinamento físico. Cada operação é um tenant com marca, equipe, alunos e dados isolados. O primeiro profissional será o primeiro cliente da plataforma.
 
-**ESTADO ATUAL:** a base de identidade inclui onboarding superadmin → personal → aluno, contexto de tenant, marca, convites e RLS. O primeiro ciclo de treino permite biblioteca própria, vídeo privado online, rascunho/publicação por aluno, registro de séries offline e sincronização idempotente. Dieta, avaliação, hospedagem e ampliação do acompanhamento continuam pendentes.
+**ESTADO ATUAL:** a base de identidade inclui onboarding superadmin → personal → aluno, contexto de tenant, marca, convites e RLS. O primeiro ciclo de treino permite biblioteca própria, vídeo privado online, rascunho/publicação por aluno, registro de séries offline e sincronização idempotente. O primeiro fluxo de dieta inclui convite do nutricionista, prescrição versionada e consulta/registro do aluno. As migrations de nutrição e treino guiado já foram aplicadas ao Supabase Cloud de teste; validação clínica, avaliação e ampliação do acompanhamento continuam pendentes.
 
 ## Comece por aqui
 
@@ -20,13 +20,13 @@
 - `infra/`: futura configuração operacional.
 - `referencia/`: material fornecido para estudo funcional. Não é código, conteúdo ou identidade visual do produto e está excluído do Git.
 
-**Hospedagem:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). O Supabase Cloud de teste já recebeu schema, contas e dados locais. Cloudflare Pages servirá a aplicação após conectar este repositório GitHub e configurar as duas variáveis públicas de build; produção terá banco separado. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md) e [INFRASTRUCTURE.md](docs/projeto/INFRASTRUCTURE.md).
+**Hospedagem:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). O Supabase Cloud de teste recebeu o schema, contas e dados iniciais; Cloudflare Pages já serve o frontend conectado à branch `main` do GitHub. Produção terá banco separado. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md) e [INFRASTRUCTURE.md](docs/projeto/INFRASTRUCTURE.md).
 
 ## Execução local
 
 Use Node 24 e Docker Desktop. Execute `npm install` e `npm run db:start`. Use `npm run db:reset` apenas quando quiser recriar o banco local, pois ele apaga contas e dados locais; `npm run db:test` verifica as migrations aplicadas. Copie `.env.example` para `apps/web/.env.local` e substitua a chave pública pelo valor de `npx supabase status -o env` (chave publicável/anon local). Depois execute `npm run dev`. `npm run lint`, `npm run test` e `npm run build` validam o frontend. `npm run test:e2e` exige build e Chromium do Playwright. Veja [DEVELOPMENT.md](docs/projeto/DEVELOPMENT.md) para detalhes.
 
-Use `/login` para entrar, `/admin` para o superadmin criar/listar espaços, gerar convites e gerir plano, prazo e acesso, `/ativar-profissional` para ativar o personal, `/app` para a área do personal, `/ativar` para o convite do aluno, `/aluno/inicio` para a área do aluno e `/diagnostico` para testes técnicos. “Espaço” é o nome mostrado na interface para o tenant técnico. Tipos de plano ainda não incluem preço ou cobrança. Não há deploy nem credenciais reais versionadas.
+Use `/login` para entrar, `/admin` para o superadmin criar/listar espaços, gerar convites e gerir plano, prazo e acesso, `/ativar-profissional` para ativar o personal, `/app` para a área do personal, `/ativar` para o convite do aluno, `/aluno/inicio` para a área do aluno e `/diagnostico` para testes técnicos. “Espaço” é o nome mostrado na interface para o tenant técnico. Tipos de plano ainda não incluem preço ou cobrança. Credenciais reais não são versionadas.
 
 No painel, use **Cadastrar personal**, copie o convite gerado e entregue ao profissional. A lista permite buscar espaços, filtrar o estado do plano e editar prazo ou suspensão; dados de alunos não aparecem para o superadmin. Se o convidado já possui conta, o link **Entre e volte ao convite automaticamente** o devolve à ativação após o login.
 
@@ -35,6 +35,10 @@ Na área do personal, **Alunos** reúne busca, filtros e cadastro; **Marca** per
 **Exercícios** permite cadastrar instruções e vídeo próprio MP4 de até 25 MB, consultado online. No detalhe do aluno, o personal registra o plano de atendimento, monta o rascunho por dias e publica uma versão. O aluno abre `/aluno/inicio`, registra séries mesmo sem conexão após carregar o treino uma vez, e vê quando o servidor confirma os lançamentos. Não há botão de download offline.
 
 O vídeo de um exercício pode ser MP4 privado ou link do YouTube. Ao atualizá-lo na biblioteca, os alunos que têm esse exercício prescrito veem a mídia atual quando abrem o treino online, sem nova publicação individual. Mudanças na prescrição de um aluno continuam exigindo publicação para ele.
+
+Na aba **Alimentação** do aluno, o personal pode convidar um nutricionista ou, se também exercer essa função, escolher **Sou nutricionista**, informar seu CRN e assumir o vínculo individual. Ele usa a mesma conta e edita o plano alimentar desse aluno na própria aba. O CRN informado ainda depende de conferência humana antes de atendimento real.
+
+No editor do nutricionista, **Dados do plano**, **Refeições** e **Conferir fonte** dividem as tarefas. Refeições de planos em ciclos podem ser filtradas por dia alto ou baixo, e cada refeição abre para edição sob demanda. A fonte importada fica agrupada por assunto e continua exigindo confirmação de revisão clínica antes de publicar.
 
 No treino, toque em **Ver vídeo online** para abrir o vídeo sobre o exercício; feche para voltar ao mesmo ponto. Se o autor do vídeo no YouTube não permitir incorporação, o modal oferece um link externo como alternativa.
 

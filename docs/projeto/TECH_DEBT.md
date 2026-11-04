@@ -32,11 +32,21 @@ Este arquivo não chama de dívida algo que ainda não foi implementado. Ele reg
 | Subdomínio/domínio próprio | DECISÃO APROVADA: adiado | Quando plano comercial exigir |
 | Implantação remota | PENDENTE | Criar Supabase de testes e Cloudflare Pages conforme ADR 0014; validar migrations, RLS, Auth, Storage, rotas e PWA no celular antes de usar dados reais |
 | Fixtures pgTAP dependentes do seed | PENDENTE | Tornar os testes de banco autossuficientes ou executá-los em ambiente descartável com seed, sem resetar o banco local preservado |
-| Dieta estruturada | DECISÃO APROVADA: adiada | Faz parte da visão de produto; definir escopo e autoria da implementação após o MVP |
+| Dieta estruturada | Primeiro fluxo e E2E CONFIRMADOS localmente | Validar CRN e conteúdo por humano, troca/revogação do parceiro, vigência, conflitos entre dispositivos e consentimento de compartilhamento; ver ADR 0015 |
 | Fotos corporais | DECISÃO APROVADA: adiadas | Após política de privacidade e storage |
+
+**CONFIRMADO LOCALMENTE:** a mesma conta pode atuar como personal e nutricionista após atribuição explícita ao aluno; ver ADR 0016. **PENDENTE:** checagem humana do CRN, fluxo de revogação e regras de substituição do responsável nutricional.
+
+**PENDENTE — DIETA GH IMPORTADA:** o rascunho local do Jean requer revisão clínica linha a linha pelo nutricionista vinculado, inclusive medicações, suplementos, exames, equivalências, datas passadas e escolha do ciclo alto/baixo. Nenhuma versão foi publicada. TypeScript, lint e build PWA completos passaram em instalação isolada; os E2E ajustados ainda precisam ser executados. A instalação de dependências no workspace principal falhou por `EPERM` em binário em uso. A migration `20261103050000` e a interface de ciclos ainda não foram implantadas no Cloud.
+
+**CONFIRMADO — ORGANIZAÇÃO DO EDITOR NUTRICIONAL:** TypeScript, lint, 13 testes unitários, build PWA e dois E2E de nutrição passaram após a reorganização da tela em etapas e cartões recolhidos. **PENDENTE:** validar a experiência com nutricionista; o rascunho importado continua sem revisão clínica e sem publicação.
+
+**CONFIRMADO LOCALMENTE — NOTAS INDIVIDUAIS:** editor por aluno e filtro de publicação foram acrescentados; o texto importado permanece separado como fonte privada. **PENDENTE:** revisão humana de cada linha clínica e do CRN, teste manual da interface com nutricionista e aplicação da migration `20261103060000` no Cloud. O rascunho real do Jean permanece sem publicação.
 
 **PENDENTE:** a fila de treino envia ao voltar online e expõe pendência/erro; faltam reconciliação entre dispositivos, recuperação de erro permanente, retenção de recibos e política de operações após inativação. A fila do diagnóstico técnico permanece separada. O ícone PWA é temporário. Essas pendências precisam ser resolvidas antes de dados reais ou piloto.
 
 **PENDENTE:** sessões anteriores à identificação de dia/semana permanecem sem essa classificação; não foram inferidas a partir de séries antigas. A navegação usa a versão atualmente publicada e não oferece histórico completo de versões antigas nem correção retroativa. A regra para repetir um mesmo dia na mesma semana exige desenho funcional. **DECISÃO APROVADA:** a prévia da experiência do aluno antes de publicar não integra esta rodada e permanece pendente.
 
 **CONFIRMADO:** o bloqueio de validação da Fase 2 foi resolvido: Docker Desktop voltou a funcionar e migration, seed, pgTAP, login e E2E passaram. O host ainda tem pouco espaço livre em C:; o serviço Vector local reinicia por não alcançar a origem de logs do Docker. Monitorar capacidade e logs antes do piloto; esses pontos não invalidaram os serviços técnicos necessários da Fase 2.1.
+
+**CONFIRMADO LOCALMENTE — TREINO GUIADO:** alternativa aprovada por item, mídia privada da alternativa, aviso de aparelho indisponível, pausa retomável, tempo ativo, descanso, última carga e progresso visual foram implementados e percorridos pelo E2E. **PENDENTE:** aplicar migrations e frontend no Cloud, testar som/vibração e cronômetro em celular real, decidir repetição do mesmo dia na semana, recuperar conflitos entre dois dispositivos, histórico completo de versões e exibir corretamente o nome do exercício de versões antigas no aviso ao personal. O valor de carga anterior é referência, não prescrição automática.

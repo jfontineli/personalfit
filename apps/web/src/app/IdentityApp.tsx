@@ -3,11 +3,15 @@ import { supabase } from '../services/supabase'
 import { safeActivationReturn } from '../routes/routes'
 import { claimInvite, claimProfessionalInvite, createInvite, createProfessionalTenantInvite, createStudent, downloadBrandLogo, getBrand, getStudent, getStudentNotes, isManagedLogoPath, isPlatformAdmin, listMemberships, listPlatformSpaces, listStudents, listTenants, removeBrandLogo, saveStudentNotes, setPlatformSpacePlan, updateBrand, updateStudent, uploadBrandLogo, type Brand, type Membership, type PlatformSpace, type Student, type StudentInput, type Tenant } from '../services/business'
 import { cacheIdentityContext, cacheStudentView, clearCachedContext, getCachedContext, getCachedStudentView } from '../offline/workoutStore'
+import { claimNutritionInvite } from '../services/nutrition'
 const ExerciseLibrary = lazy(() => import('../modules/Workouts').then(module => ({ default: module.ExerciseLibrary })))
 const WorkoutEditor = lazy(() => import('../modules/Workouts').then(module => ({ default: module.WorkoutEditor })))
 const WorkoutPlayer = lazy(() => import('../modules/Workouts').then(module => ({ default: module.WorkoutPlayer })))
 const StudentServicePlanEditor = lazy(() => import('../modules/Workouts').then(module => ({ default: module.StudentServicePlanEditor })))
 const StudentServicePlanSummary = lazy(() => import('../modules/Workouts').then(module => ({ default: module.StudentServicePlanSummary })))
+const NutritionReferral = lazy(() => import('../modules/Nutrition').then(module => ({ default: module.NutritionReferral })))
+const NutritionistArea = lazy(() => import('../modules/Nutrition').then(module => ({ default: module.NutritionistArea })))
+const StudentNutrition = lazy(() => import('../modules/Nutrition').then(module => ({ default: module.StudentNutrition })))
 
 const path = window.location.pathname
 const textError = (error: unknown) => error instanceof Error ? error.message : 'Não foi possível concluir a operação'
@@ -81,21 +85,23 @@ export function IdentityApp() {
   if (!supabase) return <main className="shell"><p>Supabase local não configurado.</p></main>
   if (path === '/ativar') return <Activation userId={userId} email={email} />
   if (path === '/ativar-profissional') return <ProfessionalActivation userId={userId} email={email} />
+  if (path === '/ativar-nutricionista') return <NutritionistActivation userId={userId} email={email} />
   if (!userId) return <Login />
 
   const membership = memberships.find(link => link.tenant_id === tenantId)
   const tenant = tenants.find(item => item.id === tenantId)
   const adminArea = path === '/admin' || (platformAdmin && memberships.length === 0)
-  return <main className={adminArea || membership?.role === 'PROFISSIONAL' ? 'shell admin-shell' : membership?.role === 'ALUNO' ? 'shell student-shell' : 'shell'}>
-    {membership?.role !== 'ALUNO' && <header><span className="eyebrow">PersonalFit</span><h1>{adminArea ? 'Administração da plataforma' : 'Área do personal'}</h1>
-      <div className="header-actions"><span>Conectado como {email}</span>{platformAdmin && !adminArea && <a href="/admin">Administração da plataforma</a>}<button onClick={() => void logout()}>Sair</button></div></header>
+  const nutritionArea = path === '/nutricionista' && (membership?.role === 'NUTRICIONISTA' || membership?.role === 'PROFISSIONAL')
+  return <main className={adminArea || membership?.role === 'PROFISSIONAL' || membership?.role === 'NUTRICIONISTA' ? 'shell admin-shell' : membership?.role === 'ALUNO' ? 'shell student-shell' : 'shell'}>
+    {membership?.role !== 'ALUNO' && <header><span className="eyebrow">PersonalFit</span><h1>{adminArea ? 'Administração da plataforma' : nutritionArea ? 'Área do nutricionista' : 'Área do personal'}</h1>
+      <div className="header-actions"><span>Conectado como {email}</span>{nutritionArea && membership?.role === 'PROFISSIONAL' && <a href="/app">Área do personal</a>}{platformAdmin && !adminArea && <a href="/admin">Administração da plataforma</a>}<button onClick={() => void logout()}>Sair</button></div></header>
     }
     {error && <p role="alert">{error}</p>}
     {path === '/admin' ? platformAdmin ? <PlatformAdminArea /> : <section className="panel"><h2>Acesso restrito</h2></section> : memberships.length === 0 ? platformAdmin ? <PlatformAdminArea /> : <section className="panel"><h2>Acesso restrito</h2><p>Não há acesso ativo a um espaço para esta conta. Confira a ativação do convite ou consulte o administrador.</p></section> : <>
       {memberships.length > 1 && <label>Espaço<select aria-label="Selecionar espaço" value={tenantId} onChange={event => setTenantId(event.target.value)}><option value="">Escolha um espaço</option>{memberships.map(link => <option key={link.tenant_id} value={link.tenant_id}>{tenants.find(item => item.id === link.tenant_id)?.name ?? link.tenant_id}</option>)}</select></label>}
       {!membership ? <p>Selecione um espaço para continuar.</p> : <>
-        {membership.role === 'PROFISSIONAL' && <p>Espaço: <strong>{tenant?.name}</strong> · Perfil: Personal</p>}
-        {membership.role === 'PROFISSIONAL' ? <ProfessionalArea tenantId={tenantId} /> : <StudentArea key={tenantId} tenantId={tenantId} userId={userId} onLogout={logout} />}
+        {membership.role === 'PROFISSIONAL' && <p>Espaço: <strong>{tenant?.name}</strong> · Perfil: {nutritionArea ? 'Nutricionista' : 'Personal'}</p>}
+        {nutritionArea || membership.role === 'NUTRICIONISTA' ? <Suspense fallback={<p>Carregando nutrição…</p>}><NutritionistArea tenantId={tenantId} /></Suspense> : membership.role === 'PROFISSIONAL' ? <ProfessionalArea tenantId={tenantId} /> : <StudentArea key={tenantId} tenantId={tenantId} userId={userId} onLogout={logout} />}
       </>}
     </>}
   </main>
@@ -262,7 +268,7 @@ function Login() {
     else {
       try {
         const [links, admin] = await Promise.all([listMemberships(), isPlatformAdmin()])
-        window.location.assign(links.some(link => link.role === 'PROFISSIONAL') ? '/app' : links.some(link => link.role === 'ALUNO') ? '/aluno/inicio' : admin ? '/admin' : '/app')
+        window.location.assign(links.some(link => link.role === 'PROFISSIONAL') ? '/app' : links.some(link => link.role === 'NUTRICIONISTA') ? '/nutricionista' : links.some(link => link.role === 'ALUNO') ? '/aluno/inicio' : admin ? '/admin' : '/app')
       } catch { window.location.assign('/app') }
     }
   }
@@ -288,9 +294,9 @@ function ProfessionalArea({ tenantId }: { tenantId: string }) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'TODOS' | 'ATIVOS' | 'INATIVOS' | 'PENDENTES'>('TODOS')
   const [showCreate, setShowCreate] = useState(false)
-  const [studentTab, setStudentTab] = useState<'CADASTRO' | 'ATENDIMENTO' | 'TREINO'>(() => {
+  const [studentTab, setStudentTab] = useState<'CADASTRO' | 'ATENDIMENTO' | 'TREINO' | 'ALIMENTACAO'>(() => {
     const requested = new URLSearchParams(window.location.search).get('aba')?.toUpperCase()
-    return requested === 'ATENDIMENTO' || requested === 'TREINO' ? requested : 'CADASTRO'
+    return requested === 'ATENDIMENTO' || requested === 'TREINO' || requested === 'ALIMENTACAO' ? requested : 'CADASTRO'
   })
   const [savingBrand, setSavingBrand] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -303,7 +309,7 @@ function ProfessionalArea({ tenantId }: { tenantId: string }) {
   const onBrandPage = path === '/app/configuracoes'
   const onExercisePage = path === '/app/exercicios'
   const onListPage = path === '/app/alunos'
-  function selectStudentTab(tab: 'CADASTRO' | 'ATENDIMENTO' | 'TREINO') {
+  function selectStudentTab(tab: 'CADASTRO' | 'ATENDIMENTO' | 'TREINO' | 'ALIMENTACAO') {
     setStudentTab(tab)
     const url = new URL(window.location.href)
     if (tab === 'CADASTRO') url.searchParams.delete('aba')
@@ -429,7 +435,8 @@ function ProfessionalArea({ tenantId }: { tenantId: string }) {
       </aside></div>}
     </section> : studentId ? <section className="panel professional-panel" aria-labelledby="student-title">
       {detail ? <><a href="/app/alunos" className="back-link">← Voltar aos alunos</a><div className="section-heading student-heading"><div><span className="eyebrow">Aluno</span><h2 id="student-title">{detail.full_name}</h2><p>Conta {detail.user_id ? 'ativada' : 'pendente'}</p></div><span className={`status-badge ${detail.status === 'ACTIVE' ? 'status-active' : 'status-suspended'}`}>{detail.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}</span></div>
-        <nav className="student-management-tabs" role="tablist" aria-label="Seções do aluno">{([['CADASTRO','Cadastro'],['ATENDIMENTO','Atendimento'],['TREINO','Treino']] as const).map(([key,label]) => <button type="button" role="tab" key={key} id={`student-tab-${key}`} aria-controls={`student-panel-${key}`} aria-selected={studentTab === key} onClick={() => selectStudentTab(key)}>{label}</button>)}</nav>
+        <nav className="student-management-tabs" role="tablist" aria-label="Seções do aluno">{([['CADASTRO','Cadastro'],['ATENDIMENTO','Atendimento'],['TREINO','Treino'],['ALIMENTACAO','Alimentação']] as const).map(([key,label]) => <button type="button" role="tab" key={key} id={`student-tab-${key}`} aria-controls={`student-panel-${key}`} aria-selected={studentTab === key} onClick={() => selectStudentTab(key)}>{label}</button>)}</nav>
+        <div className="student-management-panel" id="student-panel-ALIMENTACAO" role="tabpanel" aria-labelledby="student-tab-ALIMENTACAO" hidden={studentTab !== 'ALIMENTACAO'}><Suspense fallback={<p>Carregando alimentação…</p>}><NutritionReferral studentId={detail.id} studentName={detail.full_name} tenantId={tenantId} active={detail.status === 'ACTIVE'} /></Suspense></div>
         <div className="student-management-panel" id="student-panel-CADASTRO" role="tabpanel" aria-labelledby="student-tab-CADASTRO" hidden={studentTab !== 'CADASTRO'}><div className="student-detail-layout"><div><h3>Dados do aluno</h3><StudentForm form={form} setForm={setForm} notes={notes} setNotes={setNotes} onSubmit={saveStudent} /></div>
         <aside className="student-side"><h3>Acesso ao aplicativo</h3><p>{detail.user_id ? 'A conta deste aluno já está ativada.' : 'Envie um convite para o aluno criar a conta e acessar seu espaço.'}</p>
           {!detail.user_id && detail.status === 'ACTIVE' && <button type="button" disabled={issuingInvite} onClick={() => setConfirmNewInvite(true)}>{issuingInvite ? 'Gerando convite…' : invite ? 'Gerar novo convite' : 'Criar convite'}</button>}
@@ -462,6 +469,7 @@ function StudentForm({ form, setForm, notes, setNotes, onSubmit }: { form: Stude
 
 function StudentArea({ tenantId, userId, onLogout }: { tenantId: string; userId: string; onLogout: () => Promise<void> }) {
   const [student, setStudent] = useState<Student | null>(null)
+  const [section, setSection] = useState<'TREINO' | 'ALIMENTACAO'>('TREINO')
   const [brand, setBrand] = useState<Brand | null>(null)
   const [logoPreview, setLogoPreview] = useState('')
   const [error, setError] = useState('')
@@ -502,7 +510,7 @@ function StudentArea({ tenantId, userId, onLogout }: { tenantId: string; userId:
   return <div className="student-experience" style={theme}>
     <header className="student-app-header"><div className="student-app-brand">{logoPreview ? <img src={logoPreview} alt={`Logotipo de ${brandName}`} /> : <span className="student-brand-placeholder" aria-hidden="true">{brandName.charAt(0).toLocaleUpperCase('pt-BR')}</span>}<div><strong>{brandName}</strong>{brand?.display_name && <small>com {brand.display_name}</small>}</div></div><button type="button" className="student-logout" onClick={() => void onLogout()}>Sair</button></header>
     <section className="student-home"><div className="student-welcome"><h1>{firstName ? `Olá, ${firstName.charAt(0).toLocaleUpperCase('pt-BR') + firstName.slice(1)}` : 'Seu treino'}</h1>{(whatsappNumber || instagramValid) && <nav aria-label="Contato do personal" className="student-contact">{whatsappNumber && <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">WhatsApp</a>}{instagramValid && <a href={`https://instagram.com/${instagramHandle}`} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Instagram</a>}</nav>}</div>{error && <p role="alert">{error}</p>}
-      {student && <Suspense fallback={<p>Carregando treino…</p>}><StudentServicePlanSummary tenantId={tenantId} studentId={student.id} /><WorkoutPlayer tenantId={tenantId} studentId={student.id} userId={userId} /></Suspense>}</section>
+      {student && <><nav className="student-area-tabs" aria-label="Seu acompanhamento"><button type="button" aria-current={section === 'TREINO' ? 'page' : undefined} onClick={() => setSection('TREINO')}>Treino</button><button type="button" aria-current={section === 'ALIMENTACAO' ? 'page' : undefined} onClick={() => setSection('ALIMENTACAO')}>Alimentação</button></nav><div hidden={section !== 'TREINO'}><Suspense fallback={<p>Carregando treino…</p>}><StudentServicePlanSummary tenantId={tenantId} studentId={student.id} /><WorkoutPlayer tenantId={tenantId} studentId={student.id} userId={userId} /></Suspense></div>{section === 'ALIMENTACAO' && <Suspense fallback={<p>Carregando alimentação…</p>}><StudentNutrition studentId={student.id} tenantId={tenantId} userId={userId} /></Suspense>}</>}</section>
   </div>
 }
 
@@ -563,5 +571,28 @@ function ProfessionalActivation({ userId, email }: { userId: string | null; emai
       <label>Senha<input type="password" minLength={8} value={password} onChange={event => setPassword(event.target.value)} required /></label><button>Criar conta</button></form>
       <p>Já tem conta? <a href={`/login#returnTo=${encodeURIComponent(`/ativar-profissional#token=${token}`)}`}>Entre e volte ao convite automaticamente</a>.</p>
       {signupMessage && <p role="status" className="feedback">{signupMessage}</p>}</>}
+  </section></main>
+}
+
+function NutritionistActivation({ userId, email }: { userId: string | null; email: string }) {
+  const [signupEmail, setSignupEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [crn, setCrn] = useState('')
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const token = new URLSearchParams(location.hash.slice(1)).get('token') ?? ''
+  async function signup(event: FormEvent) {
+    event.preventDefault()
+    const { error: authError } = await supabase!.auth.signUp({ email: signupEmail, password })
+    setMessage(authError ? authErrorText(authError.message) : 'Conta criada. Confirme o e-mail, se solicitado, e volte a este convite.')
+    setPassword('')
+  }
+  async function activate(event: FormEvent) {
+    event.preventDefault(); setError('')
+    try { await claimNutritionInvite(token, crn); history.replaceState(null, '', '/nutricionista'); location.assign('/nutricionista') }
+    catch (failure) { setError(activationErrorText(failure)) }
+  }
+  return <main className="shell"><header><span className="eyebrow">Convite do nutricionista</span><h1>Ativar acesso</h1></header><section className="panel">
+    {!token ? <p>Este link não contém um convite válido.</p> : userId ? <><h2>Confirme seu vínculo</h2><p>Conectado como <strong>{email}</strong>. O plano alimentar será publicado com sua autoria.</p><form onSubmit={event => void activate(event)}><label>Registro CRN<input value={crn} onChange={event => setCrn(event.target.value)} required minLength={3} maxLength={40} placeholder="Número e região do CRN" /></label><button>Ativar meu acesso</button></form><p className="field-hint">O registro informado ainda precisará de conferência humana antes de atendimento real.</p><button type="button" className="secondary-button" onClick={() => void supabase!.auth.signOut({ scope: 'local' }).then(() => location.reload())}>Trocar conta</button>{error && <p role="alert">{error}</p>}</> : <><h2>Crie ou acesse sua conta</h2><p>Use o e-mail para o qual o personal enviou este convite.</p><form onSubmit={event => void signup(event)}><label>E-mail<input type="email" value={signupEmail} onChange={event => setSignupEmail(event.target.value)} required /></label><label>Senha<input type="password" value={password} onChange={event => setPassword(event.target.value)} minLength={8} required /></label><button>Criar conta</button></form><p>Já tem conta? <a href={`/login#returnTo=${encodeURIComponent(`/ativar-nutricionista#token=${token}`)}`}>Entre e volte ao convite</a>.</p>{message && <p role="status">{message}</p>}</>}
   </section></main>
 }

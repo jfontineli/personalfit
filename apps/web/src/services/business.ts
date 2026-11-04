@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-export type Membership = { tenant_id: string; role: 'PROFISSIONAL' | 'ALUNO'; active: boolean }
+export type Membership = { tenant_id: string; role: 'PROFISSIONAL' | 'ALUNO' | 'NUTRICIONISTA'; active: boolean }
 export type Tenant = { id: string; name: string }
 export type Brand = { tenant_id: string; brand_name: string; display_name: string; accent_color: string; secondary_color: string; logo_url: string | null; whatsapp: string | null; instagram: string | null }
 export type Student = { id: string; tenant_id: string; user_id: string | null; full_name: string; email: string; phone: string | null; goal: string | null; status: 'ACTIVE' | 'INACTIVE'; start_date: string; created_at: string }

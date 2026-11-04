@@ -18,6 +18,8 @@
 
 **CONFIRMADO PARA VÍDEOS:** o profissional envia MP4 ao bucket privado `exercise-videos` em caminho `<tenant>/<exercício>/<arquivo>.mp4`; `exercise_library.video_url` guarda `storage:<caminho>`. O aluno atribuído baixa a mídia somente quando pede reprodução online. Outro aluno ou tenant não recebe autorização pelo caminho. Vídeo publicado permanece protegido contra exclusão.
 
+**CONFIRMADO LOCALMENTE NA NUTRIÇÃO:** `create_nutrition_invite` gera convite para um aluno ativo a pedido do personal; `claim_nutrition_invite` exige token válido, e-mail confirmado e CRN informado, criando vínculo/atribuição. `nutrition_my_students` lista apenas alunos atribuídos; `nutrition_get_draft`, `nutrition_save_draft` e `nutrition_publish` permitem ao nutricionista editar e publicar versão imutável. `nutrition_student_status` devolve ao personal somente nome, CRN informado e versão/data; `nutrition_student_plan` devolve a última versão ao próprio aluno. `nutrition_log_meal` recebe ID de operação, versão, refeição, data e estado, valida o snapshot e é idempotente; `nutrition_meal_day` retorna o último estado por refeição/data ao próprio aluno. Não há chave privilegiada no navegador.
+
 ## Contratos necessários
 
 | Operação | Responsável | Estado |
@@ -59,3 +61,12 @@
 **PENDENTE:** definir formato JSON, status/códigos, tamanho máximo de lote, ordem de dependências, prazo de retenção dos IDs de idempotência, regras de conflito entre dispositivos e política de compatibilidade entre versões da PWA e da API.
 
 **NECESSITA VALIDAÇÃO HUMANA:** comportamento desejado quando um aluno é inativado enquanto possui operações feitas offline ainda pendentes.
+**CONFIRMADO LOCALMENTE — DUPLA ATUAÇÃO:** `nutrition_assign_self(p_student_id,p_crn)` exige personal ativo, e-mail confirmado, cadastro profissional ativo e aluno ativo sem nutricionista atribuído. A RPC cria registro de nutricionista, atribuição individual e auditoria, preservando o papel `PROFISSIONAL`. `claim_nutrition_invite` também aceita uma conta já vinculada como personal, preservando o papel. `nutrition_student_status` inclui `is_self` para mostrar o editor apenas ao próprio autor vinculado. As RPCs clínicas continuam condicionadas à atribuição ativa do aluno.
+
+**CONFIRMADO LOCALMENTE — CICLO E REVISÃO DA IMPORTAÇÃO:** cada refeição de `nutrition_save_draft` pode ter `cycle: "ALTO" | "BAIXO"`; a ausência do campo significa refeição válida em todos os dias. `nutrition_valid_draft` rejeita outro valor. Um rascunho importado pode carregar `sourceImport.reviewRequired = true` e contexto privado de origem. `nutrition_publish` rejeita esse rascunho até o nutricionista atribuído revisar e salvar a confirmação. O aluno escolhe explicitamente o dia do ciclo antes de ver as refeições da versão publicada; não há cálculo automático do dia.
+
+**CONFIRMADO LOCALMENTE — NOTAS INDIVIDUAIS:** `nutrition_save_draft` aceita até 80 objetos `individualNotes` com ID único, categoria, assunto, quantidade/meta, orientação e `showToStudent`. `nutrition_publish` grava apenas notas marcadas para o aluno e remove `sourceImport` do snapshot. `nutrition_student_plan` também sanitiza snapshots anteriores na resposta. A fonte importada permanece no rascunho privado para comparação; a revisão clínica continua obrigatória antes da publicação.
+
+**CONFIRMADO LOCALMENTE — TREINO GUIADO:** `publish_workout_plan` valida `alternativeExerciseIds` (até cinco, mesmo tenant, distintos do principal) e congela alternativas, `loadHintKg` e `rirHint` por item. `sync_workout_day_session_v3` acrescenta `client_started_at`, `client_finished_at`, `elapsed_seconds`, `exercise_swaps` e `exercise_issues` à operação idempotente por sessão/dia/semana. `exercise_issues` admite somente o motivo `APARELHO_INDISPONIVEL`; troca não aprovada é negada. A RPC v2 e contratos antigos permanecem para operações já pendentes. O cliente não usa `tenant_id` como prova de autorização.
+
+**CONFIRMADO LOCALMENTE — VÍDEO DAS ALTERNATIVAS:** `student_exercise_videos` agora devolve a mídia atual também para exercícios alternativos congelados na versão atribuída ao aluno; a política privada de Storage permite a leitura do MP4 correspondente e continua negando escrita ao aluno. A versão histórica conserva o link original.

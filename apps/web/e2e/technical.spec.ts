@@ -1,9 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 
-const tenantA = 'aaaaaaaa-0000-4000-8000-000000000001'
-const tenantB = 'bbbbbbbb-0000-4000-8000-000000000002'
-
 test('abre a aplicação, grava localmente e reabre offline', async ({ page, context }) => {
   await page.goto('/diagnostico')
   await expect(page.getByRole('heading', { name: 'Diagnóstico da aplicação' })).toBeVisible()
@@ -28,12 +25,18 @@ test('Auth, sessão, RLS e sincronização técnica para A, B e sem vínculo', a
 
   const admin = createClient(url!, serviceKey!, { auth: { persistSession: false, autoRefreshToken: false } })
   const fixtures = [
-    { label: 'A', tenantId: tenantA, email: `a-${crypto.randomUUID()}@example.invalid`, password: `Test-${crypto.randomUUID()}!`, id: '' },
-    { label: 'B', tenantId: tenantB, email: `b-${crypto.randomUUID()}@example.invalid`, password: `Test-${crypto.randomUUID()}!`, id: '' },
+    { label: 'A', tenantId: '', email: `a-${crypto.randomUUID()}@example.invalid`, password: `Test-${crypto.randomUUID()}!`, id: '' },
+    { label: 'B', tenantId: '', email: `b-${crypto.randomUUID()}@example.invalid`, password: `Test-${crypto.randomUUID()}!`, id: '' },
     { label: 'sem vínculo', tenantId: null, email: `none-${crypto.randomUUID()}@example.invalid`, password: `Test-${crypto.randomUUID()}!`, id: '' },
   ]
 
   try {
+    for (const user of fixtures.slice(0, 2)) {
+      const tenant = await admin.from('tenants').insert({ name: `Espaço técnico ${user.label} ${crypto.randomUUID()}` }).select('id').single()
+      expect(tenant.error).toBeNull(); user.tenantId = tenant.data!.id
+      const brand = await admin.from('tenant_brand').insert({ tenant_id: user.tenantId, brand_name: `Marca ${user.label}`, display_name: `Profissional ${user.label}`, accent_color: '#123B36', secondary_color: '#FFFFFF' })
+      expect(brand.error).toBeNull()
+    }
     for (const user of fixtures) {
       const { data, error } = await admin.auth.admin.createUser({ email: user.email, password: user.password, email_confirm: true })
       expect(error, `criação do usuário ${user.label}`).toBeNull()
@@ -94,6 +97,13 @@ test('Auth, sessão, RLS e sincronização técnica para A, B e sem vínculo', a
     await page.getByRole('button', { name: 'Sair' }).click()
   } finally {
     for (const user of fixtures) if (user.id) await admin.auth.admin.deleteUser(user.id)
+    for (const user of fixtures) if (user.tenantId) {
+      await admin.from('technical_operation_receipts').delete().eq('tenant_id', user.tenantId)
+      await admin.from('tenant_memberships').delete().eq('tenant_id', user.tenantId)
+      await admin.from('tenant_brand').delete().eq('tenant_id', user.tenantId)
+      await admin.from('tenant_plans').delete().eq('tenant_id', user.tenantId)
+      await admin.from('tenants').delete().eq('id', user.tenantId)
+    }
   }
 })
 

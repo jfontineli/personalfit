@@ -8,10 +8,12 @@ export const routes = {
   studentHome: '/aluno/inicio',
   activation: '/ativar',
   professionalActivation: '/ativar-profissional',
+  nutritionistHome: '/nutricionista',
+  nutritionistActivation: '/ativar-nutricionista',
   platformAdmin: '/admin',
   diagnostics: '/diagnostico',
 } as const
 
 export function safeActivationReturn(value: string | null): string {
-  return value && /^\/ativar(?:-profissional)?#token=[0-9a-f]{64}$/.test(value) ? value : routes.professionalHome
+  return value && /^\/ativar(?:-profissional|-nutricionista)?#token=[0-9a-f]{64}$/.test(value) ? value : routes.professionalHome
 }

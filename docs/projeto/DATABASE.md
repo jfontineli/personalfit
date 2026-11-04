@@ -34,6 +34,12 @@
 
 **PENDENTE:** ampliar execução, avaliação e contratos comerciais do aluno em migrations futuras. A primeira modelagem de biblioteca, prescrição/versões/atribuições e execução já existe; detalhes estão em `DOMAIN_MODEL.md`.
 
+**CONFIRMADO LOCALMENTE EM 2026-11-03:** três migrations aditivas criaram vínculo e convite de nutricionista, rascunho por aluno, versão publicada e eventos de refeição, e reforçaram a validação de IDs e idempotência de retries concorrentes. As seis tabelas têm RLS ativa e negam acesso direto a `anon` e `authenticated`; RPCs verificam perfil, vínculo, tenant, papel e aluno. Convite usa hash SHA-256, expiração de 48 horas e e-mail Auth confirmado. Publicação cria versão histórica; evento de refeição usa `operation_id` único e valida a refeição no snapshot. O banco local foi migrado sem reset; o Cloud de teste ainda não recebeu estas migrations.
+
+**CONFIRMADO LOCALMENTE NA DUPLA ATUAÇÃO:** `20261103030000` acrescenta `nutrition_assign_self` e permite `PROFISSIONAL` na autorização clínica somente quando também existe registro e atribuição ativos de nutricionista. `20261103040000` permite que um personal aceite convite nutricional sem alterar sua membership. As duas migrations foram aplicadas sem reset no banco local; o Cloud de teste ainda não as recebeu.
+
+**CONFIRMADO LOCALMENTE NA IMPORTAÇÃO GH:** `20261103050000` valida o campo opcional `cycle` (`ALTO` ou `BAIXO`) nas refeições e rejeita publicação com `sourceImport.reviewRequired = true`. O rascunho do Jean foi inserido uma vez no banco local existente, sem criar versão publicada: 7 refeições, 42 linhas de contexto, 4 refeições do ciclo alto e 3 do baixo. A migration foi aplicada localmente em transação e registrada em `schema_migrations`, sem reset. O Cloud ainda não recebeu esta migration nem o rascunho.
+
 ## Invariantes de modelagem
 
 - **DECISÃO APROVADA:** dados privados pertencem a um tenant e são acessados pelo vínculo correto.
@@ -54,3 +60,9 @@
 **CONFIRMADO NA CÓPIA DE TESTE (2026-11-02):** as 21 migrations atuais foram aplicadas ao Supabase Cloud de teste em São Paulo. Dados atuais de `public`, `auth.users` e `auth.identities` foram copiados preservando identificadores, vínculos, versões e sessões de treino; 4 hashes de senha e 4 e-mails confirmados estão presentes. Sessões/tokens de Auth não foram copiados. O único logotipo privado foi enviado ao bucket remoto e conferido por download e SHA-256. O backup local pré-cópia está em diretório temporário ignorado; não constitui política de backup de produção.
 
 **NECESSITA VALIDAÇÃO HUMANA:** prazo de retenção e política de exclusão/exportação de dados pessoais.
+
+**CONFIRMADO LOCALMENTE EM 2026-11-03:** a migration aditiva `20261103060000_nutrition_individual_notes.sql` valida até 80 notas individuais por rascunho, com IDs únicos, categoria e visibilidade explícita. `nutrition_public_snapshot` remove `sourceImport` e notas privadas antes de gravar uma versão; `nutrition_student_plan` repete o filtro na leitura, inclusive para snapshots anteriores. A migration foi aplicada ao banco local preservado, sem reset. Implantação no Cloud permanece pendente.
+
+**CONFIRMADO LOCALMENTE — EXECUÇÃO GUIADA:** `20261103070000` acrescenta alternativas congeladas em `workout_plan_versions.snapshot`, `PAUSED`, horários e duração da sessão, e `exercise_swaps` por item; `20261103080000` congela metas opcionais de carga e esforço; `20261103090000` acrescenta `exercise_issues`. A RPC v3 valida aluno ativo, tenant, versão, dia, semana, alternativa aprovada e ID de operação antes de gravar o aviso de aparelho indisponível. O item principal e a versão não são editados pela troca. As três migrations foram aplicadas localmente sem reset; Cloud pendente.
+
+**CONFIRMADO LOCALMENTE — MÍDIA DA ALTERNATIVA:** `20261103100000` inclui alternativas aprovadas em `student_exercise_videos` e na autorização de leitura do bucket privado; `20261103110000` corrige o validador de caminho UUID/UUID/UUID para preservar uploads profissionais após a migration anterior. Ambas foram aplicadas localmente, sem reset. O E2E confirmou upload do exercício principal e reprodução privada de MP4 da alternativa publicado depois da versão, sem republicação.

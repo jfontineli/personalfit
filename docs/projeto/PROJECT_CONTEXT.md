@@ -24,7 +24,9 @@ O profissional precisa cadastrar alunos, prescrever e publicar treinos, acompanh
 
 ## Fora do MVP
 
-**DECISÃO APROVADA:** adiar editor completo de dieta, fotos corporais do aluno, ranking, gamificação, indicação, afiliados, IA, checkout, cobrança automatizada, chat interno, áudio, wearables, progressão automática, técnicas avançadas estruturadas e domínio personalizado. Dieta e acompanhamento fazem parte da visão do produto, mas o editor estruturado de dieta não aumenta o escopo técnico do MVP. Foto de perfil e logo do profissional são elementos de identidade, distintos das fotos corporais adiadas.
+**DECISÃO APROVADA:** adiar fotos corporais do aluno, ranking, gamificação, indicação, afiliados, IA, checkout, cobrança automatizada, chat interno, áudio, wearables, progressão automática, técnicas avançadas estruturadas e domínio personalizado. Dieta e acompanhamento fazem parte da visão do produto. Em 2026-11-03, o usuário definiu o nutricionista parceiro como autor e publicador da prescrição individual (ADR 0015). O primeiro fluxo foi implementado localmente; escopo clínico e implantação remota permanecem pendentes. Foto de perfil e logo do profissional são elementos de identidade, distintos das fotos corporais adiadas.
+
+**CONFIRMADO LOCALMENTE EM 2026-11-03:** o primeiro fluxo de dieta foi implementado com convite do nutricionista pelo personal, área própria de prescrição, publicação versionada e consulta/registro simples pelo aluno. Não contempla cálculo automático, protocolos de medicamentos, validação de CRN ou compartilhamento clínico com o personal. A implantação remota permanece pendente.
 
 ## Referência
 
@@ -33,3 +35,4 @@ O profissional precisa cadastrar alunos, prescrever e publicar treinos, acompanh
 ## Objetivo comercial
 
 **DECISÃO APROVADA:** entregar um produto utilizável para o primeiro cliente preservando bases comerciais para vários profissionais. Cobrança poderá evoluir por tenant, alunos, planos e white-label, sem implementar financeiro no MVP.
+**DECISÃO APROVADA EM 2026-11-03:** um personal que também é nutricionista pode prescrever a alimentação dos alunos a ele atribuídos com a mesma conta. A capacidade clínica é individual por aluno e não decorre automaticamente do papel de personal. Ver ADR 0016; verificação humana do CRN permanece pendente.

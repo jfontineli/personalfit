@@ -78,7 +78,7 @@ test('superadmin cria tenant, personal ativa acesso e cadastra aluno', async ({ 
     await page.getByLabel('E-mail', { exact: true }).fill(`aluno-${suffix}@example.invalid`)
     await page.getByRole('button', { name: 'Salvar aluno' }).click()
     await expect(page.getByRole('heading', { name: 'Aluno Onboarding' })).toBeVisible({ timeout: 20_000 })
-    await expect(page.getByText('Conta: pendente')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText('Conta pendente')).toBeVisible({ timeout: 20_000 })
     await page.getByRole('button', { name: 'Sair' }).click()
     await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible({ timeout: 15_000 })
     await page.reload()

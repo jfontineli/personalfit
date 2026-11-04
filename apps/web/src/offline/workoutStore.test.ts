@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { cacheWorkout, confirmWorkoutOperation, getCachedWorkout, getLocalSession, pendingWorkoutOperations, resetWorkoutStoreForTests, saveLocalWorkoutSession } from './workoutStore'
 import type { WorkoutVersion } from '../services/workouts'
 
@@ -43,5 +43,25 @@ describe('execução local do treino', () => {
     expect(operations.map(item => item.session.revision)).toEqual([1, 2])
     await confirmWorkoutOperation(operations[0].id)
     expect((await pendingWorkoutOperations('user-a','tenant-a')).map(item => item.session.revision)).toEqual([2])
+  })
+
+  it('soma somente tempo ativo e mantém o aviso na fila offline', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    try {
+      vi.setSystemTime(new Date('2026-11-03T10:00:00Z'))
+      await saveLocalWorkoutSession('user-a','tenant-a','student-a',version,'session-time',[],'IN_PROGRESS')
+      vi.setSystemTime(new Date('2026-11-03T10:00:05Z'))
+      const paused = await saveLocalWorkoutSession('user-a','tenant-a','student-a',version,'session-time',[],'PAUSED',undefined,undefined,
+        undefined,undefined,{ 'item-1': 'APARELHO_INDISPONIVEL' })
+      expect(paused.elapsed_seconds).toBe(5)
+      vi.setSystemTime(new Date('2026-11-03T10:01:05Z'))
+      const resumed = await saveLocalWorkoutSession('user-a','tenant-a','student-a',version,'session-time',[],'IN_PROGRESS')
+      expect(resumed.elapsed_seconds).toBe(5)
+      vi.setSystemTime(new Date('2026-11-03T10:01:08Z'))
+      const finished = await saveLocalWorkoutSession('user-a','tenant-a','student-a',version,'session-time',[],'PARTIAL')
+      expect(finished.elapsed_seconds).toBe(8)
+      expect(finished.exercise_issues).toEqual({ 'item-1': 'APARELHO_INDISPONIVEL' })
+      expect((await pendingWorkoutOperations('user-a','tenant-a')).map(item => item.session.revision)).toEqual([1,2,3,4])
+    } finally { vi.useRealTimers() }
   })
 })

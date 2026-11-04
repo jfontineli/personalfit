@@ -19,6 +19,7 @@ usuário autenticado → vínculo ativo → tenant → papel/permissão → recu
 | SUPER_ADMIN | Criar e listar espaços/primeiros profissionais, gerir plano e acesso por RPCs auditadas; sem leitura de alunos/marcas | CONFIRMADO localmente |
 | PROFISSIONAL | Ler tenant e marca próprios; editar marca; listar, cadastrar, editar, inativar, reativar e convidar alunos do tenant; ler/escrever observações internas; ler auditoria do tenant | CONFIRMADO |
 | ALUNO | Ler tenant/marca do vínculo ativo e somente seu cadastro ativo; não editar cadastro, marca ou observações internas | CONFIRMADO |
+| NUTRICIONISTA | Consultar alunos atribuídos, editar rascunho e publicar prescrição alimentar apenas desses alunos | CONFIRMADO localmente no primeiro fluxo de nutrição |
 
 **DECISÃO APROVADA:** nesta fase o PROFISSIONAL administra todos os alunos do tenant vinculado; não há atribuição individual nem papéis customizáveis. **PENDENTE:** equipe granular, suporte excepcional e funções administrativas de SUPER_ADMIN.
 
@@ -29,6 +30,10 @@ usuário autenticado → vínculo ativo → tenant → papel/permissão → recu
 **CONFIRMADO PARA LOGOTIPOS:** as policies de `storage.objects` limitam o bucket `brand-logos` a caminhos do tenant. Membros com vínculo e perfil ativos podem baixar o logotipo quando o plano permite acesso; só o profissional ativo pode enviar ou remover. Superadmin sem vínculo, outro tenant, vínculo inativo e plano suspenso não recebem acesso. O caminho indicado pelo cliente é validado pelo banco.
 
 **CONFIRMADO NO PRIMEIRO CICLO DE TREINO:** biblioteca e rascunho são editáveis apenas pelo profissional ativo do tenant. Aluno não lê rascunho nem biblioteca inteira; lê somente versões atribuídas a seu cadastro ativo, suas sessões e seu plano de atendimento. Profissional vê sessões dos alunos do próprio espaço. Apenas RPCs privilegiadas publicam versões/atribuições e escrevem sessões/recibos; elas verificam papel, vínculo, perfil, plano SaaS vigente, aluno e recurso. Vídeo privado só é lido pelo profissional do espaço ou por aluno cuja versão atribuída o referencia; upload é exclusivo do profissional, e vídeo publicado não pode ser apagado. Testes pgTAP cobrem A/B, dois alunos de A, anon e inativação.
+
+**CONFIRMADO LOCALMENTE NA NUTRIÇÃO:** o personal pode emitir convite para aluno ativo e consultar apenas o status do vínculo/publicação. O nutricionista usa conta Auth, registro `nutritionists` e atribuição ativa ao aluno; sua membership pode ser `NUTRICIONISTA` ou `PROFISSIONAL` quando exerce as duas funções. Somente o nutricionista atribuído recebe rascunho e publica. O aluno ativo lê apenas sua versão publicada e envia seus próprios registros. O superadmin não recebe leitura clínica. As tabelas não concedem leitura/escrita direta a clientes. O pgTAP negou anon, outro tenant, outro aluno do mesmo tenant, personal sem atribuição lendo rascunho e aluno inativo.
+
+**CONFIRMADO LOCALMENTE NA DUPLA ATUAÇÃO:** uma conta `PROFISSIONAL` pode adquirir capacidade de nutricionista sem mudar de papel, por autoatribuição explícita a aluno sem nutricionista ativo ou por convite. Apenas o papel de personal não concede leitura clínica: as RPCs exigem também registro `nutritionists` ativo e atribuição ativa ao aluno específico. Outro personal do mesmo tenant continua sem acesso ao rascunho. Ver ADR 0016.
 
 ## Verificações negativas mínimas
 

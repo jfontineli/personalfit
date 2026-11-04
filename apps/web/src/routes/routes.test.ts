@@ -4,9 +4,10 @@ import { safeActivationReturn } from './routes'
 describe('retorno após login', () => {
   const token = 'a'.repeat(64)
 
-  it('retorna somente aos convites locais de aluno e personal', () => {
+  it('retorna somente aos convites locais de aluno, personal e nutricionista', () => {
     expect(safeActivationReturn(`/ativar#token=${token}`)).toBe(`/ativar#token=${token}`)
     expect(safeActivationReturn(`/ativar-profissional#token=${token}`)).toBe(`/ativar-profissional#token=${token}`)
+    expect(safeActivationReturn(`/ativar-nutricionista#token=${token}`)).toBe(`/ativar-nutricionista#token=${token}`)
   })
 
   it('recusa destinos externos, caminhos arbitrários e convites malformados', () => {
