@@ -80,6 +80,14 @@ select is((select snapshot #>> '{days,0,items,0,setLabels,1}' from public.workou
   'Work · 8-12 reps','set role stays in version');
 select throws_ok($$select public.publish_workout_plan('22222222-aaaa-4aaa-8aaa-aaaaaaaaaa11')$$,'42501',null,'coach A cannot publish B plan');
 
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111101',true);
+select is((select count(*) from public.professional_workout_overview('11111111-0000-4000-8000-000000000001')),
+  2::bigint,'professional overview contains only own tenant students');
+select throws_ok($$select * from public.professional_workout_overview('22222222-0000-4000-8000-000000000002')$$,
+  '42501',null,'professional cannot inspect another tenant overview');
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
+select throws_ok($$select * from public.professional_workout_overview('11111111-0000-4000-8000-000000000001')$$,
+  '42501',null,'student cannot inspect professional overview');
 reset role;
 update public.exercise_library set instructions='New instruction' where id='11111111-eeee-4eee-8eee-eeeeeeeeeee1';
 select is((select snapshot #>> '{days,0,items,0,instructions}' from public.workout_plan_versions where plan_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11'),

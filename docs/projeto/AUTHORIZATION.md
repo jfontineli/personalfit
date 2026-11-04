@@ -49,3 +49,5 @@ Vínculos inativos também não são retornados pela policy de leitura de `tenan
 ## Casos especiais
 
 **CONFIRMADO:** múltiplos vínculos permitem seleção explícita do tenant no frontend; um vínculo único é selecionado automaticamente; sem vínculo o acesso é restrito. Convite usa hash e email confirmado. **PENDENTE:** transferência de aluno, suporte excepcional, exportação e mudança de email após ativação.
+
+**CONFIRMADO LOCALMENTE EM 2026-11-04:** `professional_workout_overview(p_tenant)` é uma RPC de leitura compacta para acompanhamento. O `p_tenant` recebido não concede acesso: a função verifica `auth.uid()`, vínculo ativo de `PROFISSIONAL`, perfil ativo e `tenant_access_allowed` antes de ler alunos e sessões daquele tenant. Retorna apenas indicadores de atividade, sem séries, cargas ou dados clínicos. O teste pgTAP nega acesso ao aluno e ao profissional de outro tenant. A migration foi aplicada também ao Cloud de teste, sem seed ou reset; o teste de papéis foi executado no banco local.

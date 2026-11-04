@@ -108,6 +108,16 @@ code { overflow-wrap: anywhere; }
 .professional-panel .search-field { margin-bottom: 20px; }
 .professional-next { margin-top: 24px; padding: 20px; border-radius: 14px; background: #f5f8f3; }
 .professional-next p { margin: 7px 0 10px; color: #50665e; }
+.professional-activity { margin-top: 26px; border-top: 1px solid #dce5d8; padding-top: 22px; }
+.professional-activity .section-heading { margin-bottom: 14px; }
+.activity-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.activity-filters button { width: auto; min-height: 38px; padding: 8px 12px; background: #edf3ed; color: #15332e; }
+.activity-filters button[aria-pressed="true"] { background: #123b36; color: white; }
+.activity-list { display: grid; gap: 8px; }
+.activity-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid #dce5d8; border-radius: 10px; }
+.activity-row > div { display: grid; gap: 3px; min-width: 0; }
+.activity-row span, .activity-row small { color: #49655f; }
+.activity-row a { flex: 0 0 auto; }
 .action-link { display: inline-flex; align-items: center; border-radius: 10px; padding: 12px 16px; background: #123b36; color: #fff; text-decoration: none; font-weight: 700; white-space: nowrap; }
 .action-link:hover { background: #23584e; }
 .brand-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 1fr); align-items: start; gap: 28px; margin-top: 26px; }
@@ -240,18 +250,30 @@ code { overflow-wrap: anywhere; }
 .student-exercise-card { margin: 10px 0; border: 1px solid #dce5d8; border-radius: 12px; background: #fff; }
 .student-exercise-card { scroll-margin-top: 18px; }
 .student-exercise-card.is-complete { border-color: #a9d0b4; background: #f1f8f2; }
+.student-exercise-card.is-deferred { border-style: dashed; }
+.student-defer-button { margin: 10px 0; }
+.student-finish-summary { display: grid; gap: 4px; margin: 16px 0; padding: 16px; border: 1px solid #a9d0b4; border-radius: 12px; background: #f1f8f2; }
+.student-finish-summary small { color: #49655f; }
 .student-exercise-card.is-complete .student-exercise-number { background: #d9ecdd; color: #13512e; }
 .student-day-tabs button.is-complete { border-color: #a9d0b4; background: #eef7ef; }
 .student-day-tabs button.is-partial { border-color: #d9c7a1; background: #fbf7ed; }
 .student-session-clock, .student-rest-clock { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; padding: 12px 14px; margin: 12px 0; border-radius: 12px; border: 1px solid #dce5d8; background: #f7faf5; }
 .student-session-clock strong, .student-rest-clock strong { font-variant-numeric: tabular-nums; font-size: 1.15rem; }
-.student-rest-clock { border-color: var(--student-accent); }
+.workout-player.has-session-dock { padding-bottom: 92px; }
+.workout-player.has-rest-clock { padding-bottom: 176px; }
+.student-session-dock { position: fixed; z-index: 40; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(430px, calc(100vw - 24px)); padding: 10px 14px; border: 2px solid var(--student-accent); border-radius: 14px; box-shadow: 0 12px 36px #0d2c2640; background: #fff; }
+.student-dock-elapsed, .student-rest-clock { display: flex; align-items: center; justify-content: space-between; gap: 8px 14px; }
+.student-dock-elapsed strong { font-variant-numeric: tabular-nums; }
+.student-rest-clock { flex-wrap: wrap; padding: 8px 0 0; margin: 8px 0 0; border: 0; border-top: 1px solid #dce5d8; border-radius: 0; background: transparent; }
+.student-rest-clock strong { color: var(--student-accent); font-size: 1.65rem; }
+.student-rest-clock .text-button { flex-basis: 100%; text-align: left; }
 .student-rest-clock.is-ready { background: #e7f4e8; font-weight: 700; }
 .student-day-progress { display: grid; gap: 6px; margin: 12px 0; }
 .student-day-progress progress { width: 100%; accent-color: var(--student-accent); }
 .student-pause-button { margin: 12px 0; }
 .student-swap { display: grid; gap: 10px; margin: 12px 0; }
 .student-swap label { display: grid; gap: 6px; }
+.student-swap-empty { margin: 12px 0; padding: 12px; border-radius: 10px; background: #f3f7f2; color: #49655f; font-size: .88rem; }
 .student-swap-note { border-left: 3px solid var(--student-accent); padding-left: 10px; }
 .workout-alternatives { grid-column: 1 / -1; display: grid; gap: 8px; padding: 12px; border: 1px solid #dce5d8; border-radius: 10px; }
 .workout-alternatives p { margin: 0; color: #49655f; }
@@ -286,6 +308,7 @@ code { overflow-wrap: anywhere; }
 .student-finish { scroll-margin-top: 18px; }
 .workout-set > button { grid-column: 1 / -1; }
 .workout-set > button.text-button { justify-self: start; padding: 0; background: transparent; color: var(--student-accent); }
+.workout-set > button.reuse-load-button { grid-column: 1 / -1; justify-self: start; min-height: 36px; width: auto; padding: 7px 11px; }
 .workout-set label { min-width: 0; }
 .workout-set input { width: 100%; }
 .instruction-video { margin: 12px 0; }
