@@ -1,5 +1,9 @@
 # Regras de negócio aprovadas
 
+**DECISÃO APROVADA EM 2026-11-04:** o treino do aluno privilegia a sequência de execução; conteúdo complementar é acessado em área própria, somente após preenchimento e publicação pelo profissional. O cardio prescrito pode detalhar inclinação e velocidade por intervalos, mas o aluno registra a duração total realizada. O treino de esteira informado pelo usuário foi aplicado como nova versão nos cinco dias do plano de teste do Jean, sem sobrescrever o histórico.
+
+**DECISÃO APROVADA E CONFIRMADA LOCALMENTE EM 2026-11-04:** o personal decide por item se um alongamento exige registro de carga ou apenas conclusão. No segundo caso, o aluno usa “Marcar como feito”, sem declarar tempo ou repetições fictícios. O personal cadastra atividade Cardio na própria biblioteca e prescreve duração individual; o aluno informa os minutos executados. O sistema não gera treino nem troca cardio automaticamente.
+
 ## Tenant e aluno
 
 **DECISÃO APROVADA:** cada tenant possui marca e dados próprios. Um profissional não acessa dados de outro tenant; um aluno não acessa outro aluno. O primeiro cliente não recebe exceção de arquitetura.

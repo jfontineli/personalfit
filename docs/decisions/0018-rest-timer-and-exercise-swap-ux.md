@@ -8,7 +8,7 @@ Na execução pelo celular, a contagem do descanso ficava no topo da página e d
 
 ## Decisão
 
-- O tempo total do treino fica visível durante a execução e após a conclusão. A contagem regressiva do descanso aparece no mesmo painel fixo enquanto corre e mostra minutos e segundos. Ao terminar, mostra um aviso visual breve; som e vibração continuam sujeitos ao navegador.
+- O tempo total do treino fica visível durante a execução e após a conclusão. A contagem regressiva do descanso aparece no mesmo painel fixo em segundos, inclusive acima de 60 (por exemplo, 120s). Ao terminar, mostra um aviso visual breve, emite um toque original de três notas e solicita vibração quando o dispositivo permitir. O aluno pode ligar ou desligar cada recurso e testar o alerta durante o descanso. Som e vibração em segundo plano dependem do navegador e do sistema operacional; não há garantia com a tela bloqueada ou outro aplicativo aberto.
 - O aluno escolhe apenas as alternativas aprovadas pelo personal na prescrição publicada, antes da primeira série daquele exercício. A troca vale somente para a sessão do dia; o exercício principal permanece na prescrição.
 - Quando não houver alternativa aprovada, a interface explica que o aluno deve combinar a troca com seu personal. Não apresenta um exercício como equivalente por inferência de grupo muscular e não cria um aviso de aparelho indisponível como substituto da troca.
 - O contrato e os registros históricos de `exercise_issues` permanecem legíveis; esta alteração de interface não modifica migrations ou versões publicadas.

@@ -1,5 +1,9 @@
 # Modelo de domínio inicial
 
+**CONFIRMADO EM 2026-11-04:** `WorkoutDraft` pode conter orientações complementares individualizadas e etapas estruturadas de cardio; `WorkoutVersion` congela ambas na publicação. A execução usa a versão atribuída e não modifica a prescrição. No treino do Jean, a nova versão inclui cardio nos cinco dias e a versão antiga continua disponível no histórico.
+
+**CONFIRMADO LOCALMENTE EM 2026-11-04:** o item prescrito tem estilo `SERIES`, `PREPARATION` ou `CARDIO`. Preparação simples preserva as etapas no snapshot, mas o aluno marca o item como feito em um toque; cada etapa recebe somente um marcador de conclusão. O alongamento com carga usa `SERIES`. Cardio usa exercício da biblioteca do personal, meta em minutos e duração realizada em segundos. Nenhum destes registros reescreve versões já publicadas.
+
 Este documento distingue os conceitos aprovados do schema efetivamente criado. A base de identidade e o primeiro ciclo de treino/execução possuem migrations; funcionalidades posteriores permanecem conceituais.
 
 **CONFIRMADO EM 2026-10-01:** o primeiro schema de treino já existe nas migrations `20261001000000` a `20261001040000`. A tabela conceitual abaixo continua indicando o escopo aprovado; parte da execução avançada e da avaliação segue pendente.

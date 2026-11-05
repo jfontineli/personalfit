@@ -21,5 +21,8 @@ Cada ADR registra contexto, decisão, alternativas e consequências. Uma decisã
 | [0015](0015-nutritionist-authored-diet.md) | Autoria da prescrição alimentar pelo nutricionista parceiro | DECISÃO APROVADA; primeiro fluxo local confirmado |
 | [0016](0016-dual-professional-nutrition-capability.md) | Personal com capacidade de nutricionista na mesma conta | DECISÃO APROVADA; fluxo local confirmado |
 | [0017](0017-workout-execution-guidance.md) | Troca aprovada, pausa e execução guiada do treino | DECISÃO APROVADA; fluxo local confirmado |
+| [0018](0018-rest-timer-and-exercise-swap-ux.md) | Descanso visível e troca orientada | DECISÃO APROVADA; frontend confirmado |
+| [0019](0019-simple-preparation-and-cardio.md) | Preparação simples e cardio prescrito | DECISÃO APROVADA; banco de teste atualizado |
+| [0020](0020-guides-separate-from-workout.md) | Orientações separadas da execução do treino | DECISÃO APROVADA; implementação publicada no teste |
 
 Os ADRs 0001 a 0008 foram registrados em 2026-09-29; os ADRs 0009 a 0011, em 2026-09-30; os ADRs 0012 a 0014, em 2026-11-02; os ADRs 0015 a 0017, em 2026-11-03. A aprovação da arquitetura não significa que a implementação já exista.

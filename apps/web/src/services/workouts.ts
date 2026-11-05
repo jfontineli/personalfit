@@ -1,17 +1,19 @@
 import { supabase } from './supabase'
 
-export type MuscleGroup = 'MOBILIDADE' | 'PEITO' | 'COSTAS' | 'OMBROS' | 'BRACOS' | 'PERNAS' | 'POSTERIOR_GLUTEOS' | 'PANTURRILHAS' | 'CORE' | 'OUTROS'
+export type MuscleGroup = 'MOBILIDADE' | 'PEITO' | 'COSTAS' | 'OMBROS' | 'BRACOS' | 'PERNAS' | 'POSTERIOR_GLUTEOS' | 'PANTURRILHAS' | 'CORE' | 'CARDIO' | 'OUTROS'
+export type WorkoutGuideKey = 'COMO_USAR' | 'EXECUCAO' | 'HIPOPRESSIVO' | 'ACOMPANHAMENTO' | 'GLOSSARIO' | 'ACESSORIOS' | 'INDICACOES' | 'CONTATO'
+export type CardioStep = { startMinute: number; endMinute: number; inclinePercent: number; speedKmh: number }
 export type Exercise = { id: string; tenant_id: string; name: string; instructions: string; video_url: string | null; muscle_group: MuscleGroup }
-export type DraftItem = { id: string; exerciseId: string; alternativeExerciseIds?: string[]; sets: number; reps: string; loadHintKg?: number; rirHint?: string; targetKind?: 'REPS' | 'TIME'; recordingStyle?: 'SERIES' | 'PREPARATION'; notes?: string; restSeconds?: number; setLabels?: string[] }
+export type DraftItem = { id: string; exerciseId: string; alternativeExerciseIds?: string[]; sets: number; reps: string; loadHintKg?: number; rirHint?: string; cardioMinutes?: number; cardioSteps?: CardioStep[]; targetKind?: 'REPS' | 'TIME'; recordingStyle?: 'SERIES' | 'PREPARATION' | 'CARDIO'; notes?: string; restSeconds?: number; setLabels?: string[] }
 export type DraftDay = { id: string; name: string; items: DraftItem[] }
-export type WorkoutDraft = { guidance?: string; importantNote?: string; startsOn?: string; durationWeeks?: number; reviewRequired?: boolean; days: DraftDay[] }
+export type WorkoutDraft = { guidance?: string; guides?: Partial<Record<WorkoutGuideKey, string>>; importantNote?: string; startsOn?: string; durationWeeks?: number; reviewRequired?: boolean; days: DraftDay[] }
 export type WorkoutPlan = { id: string; tenant_id: string; student_id: string; title: string; draft: WorkoutDraft }
 export type PublishedAlternative = { exerciseId: string; name: string; instructions: string; videoUrl: string | null }
 export type PublishedItem = DraftItem & { name: string; instructions: string; videoUrl: string | null; alternatives?: PublishedAlternative[] }
 export type PublishedDay = { id: string; name: string; items: PublishedItem[] }
-export type WorkoutVersion = { id: string; tenant_id: string; plan_id: string; version_number: number; snapshot: { title: string; guidance?: string; importantNote?: string; startsOn?: string; durationWeeks?: number; days: PublishedDay[] }; published_at: string }
+export type WorkoutVersion = { id: string; tenant_id: string; plan_id: string; version_number: number; snapshot: { title: string; guidance?: string; guides?: Partial<Record<WorkoutGuideKey, string>>; importantNote?: string; startsOn?: string; durationWeeks?: number; days: PublishedDay[] }; published_at: string }
 export type WorkoutAssignment = { id: string; tenant_id: string; student_id: string; version_id: string; assigned_at: string }
-export type WorkoutEntry = { itemId: string; setNumber: number; reps?: number; durationSeconds?: number; loadKg?: number; rir?: number }
+export type WorkoutEntry = { itemId: string; setNumber: number; reps?: number; durationSeconds?: number; loadKg?: number; rir?: number; completed?: true }
 export type WorkoutSession = { id: string; tenant_id: string; student_id: string; version_id: string; day_id: string | null; week_start: string | null; revision: number; entries: WorkoutEntry[]; status: 'IN_PROGRESS' | 'PAUSED' | 'COMPLETED' | 'PARTIAL'; started_at: string; updated_at?: string; client_started_at?: string | null; client_finished_at?: string | null; elapsed_seconds?: number; exercise_swaps?: Record<string, string>; exercise_issues?: Record<string, 'APARELHO_INDISPONIVEL'> }
 export type StudentServicePlan = { tenant_id: string; student_id: string; name: string; starts_on: string; ends_on: string | null; active: boolean }
 

@@ -1,5 +1,11 @@
 # Persistência e banco de dados
 
+**CONFIRMADO NO CLOUD DE TESTE EM 2026-11-04:** as migrations `20261104010000`, `20261104020000` e `20261104030000` estão aplicadas. A publicação valida `guides` por chave e tamanho e `cardioSteps` por continuidade, limites de intensidade e cobertura integral da duração. Os campos são copiados para o snapshot imutável. O treino do Jean tem versões 1 e 2; somente a versão 2 contém cinco itens de cardio com seis etapas válidas cada. Triggers anteriores continuam bloqueando rascunho com revisão pendente e copiando as referências de carga/RIR.
+
+**CONFIRMADO EM 2026-11-04:** `20261104010000_simple_preparation_and_cardio.sql` amplia o grupo da biblioteca com `CARDIO` e a publicação com `recordingStyle: CARDIO`, meta `cardioMinutes` entre 1 e 240 e alvo de tempo. A RPC v2 e o trigger de sessão aceitam `completed: true` apenas em etapas de `PREPARATION`, sem carga, RIR, repetições ou duração, preservando a quantidade prescrita de etapas. Cardio aceita duração de até 14.400 segundos, sem carga e RIR. Versões antigas não são alteradas; a migration foi aplicada localmente e no Cloud de teste sem reset.
+
+**CONFIRMADO — COMPATIBILIDADE:** `20261104020000_legacy_stretch_completion.sql` também aceita a conclusão simples para item de snapshot antigo sem `recordingStyle`, cujo nome começa por “Alongamento” e não tem meta de carga. O snapshot permanece intacto; entradas antigas com duração continuam válidas. A migration foi aplicada localmente e no Cloud de teste sem reset.
+
 ## Autoridade dos dados
 
 **DECISÃO APROVADA:** PostgreSQL é a fonte consolidada. IndexedDB contém prescrição disponível offline, sessões em andamento e operações pendentes; `localStorage` guarda apenas preferências simples. Cache Storage guarda recursos da PWA. Supabase Storage privado guarda logotipos e vídeos próprios do profissional.

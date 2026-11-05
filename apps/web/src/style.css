@@ -268,6 +268,9 @@ code { overflow-wrap: anywhere; }
 .student-rest-clock strong { color: var(--student-accent); font-size: 1.65rem; }
 .student-rest-clock .text-button { flex-basis: 100%; text-align: left; }
 .student-rest-clock.is-ready { background: #e7f4e8; font-weight: 700; }
+.student-rest-controls { display: flex; flex-basis: 100%; flex-wrap: wrap; gap: 6px; }
+.student-rest-controls button { width: auto; min-height: 32px; padding: 5px 9px; border: 1px solid #cbd9cc; border-radius: 8px; background: #fff; color: #173d35; font-size: .78rem; font-weight: 600; }
+.student-rest-controls button:disabled { opacity: .5; }
 .student-day-progress { display: grid; gap: 6px; margin: 12px 0; }
 .student-day-progress progress { width: 100%; accent-color: var(--student-accent); }
 .student-pause-button { margin: 12px 0; }
@@ -466,3 +469,22 @@ code { overflow-wrap: anywhere; }
 .nutrition-review-action input { flex: 0 0 auto; }
 @media (max-width: 600px) { .nutrition-meal-editor, .nutrition-meal { padding: .85rem; } .nutrition-editor .form-actions { flex-direction: column; } }
 @media (max-width: 600px) { .nutrition-meal-editor { padding: 0; } .nutrition-meal-body { padding: 0 12px 14px; } .nutrition-editor-summary { flex-direction: column; } .nutrition-editor-nav { flex-wrap: nowrap; overflow-x: auto; } .nutrition-editor-nav button { flex: 0 0 auto; } .nutrition-cycle-tabs button { flex: 1 1 auto; } }
+
+.student-workout-sections { display: flex; gap: 6px; margin: 16px 0; padding: 4px; border: 1px solid #dbe6d9; border-radius: 12px; background: #f7faf6; }
+.student-workout-sections button { flex: 1; border: 0; border-radius: 9px; background: transparent; color: #123b36; font-weight: 700; }
+.student-workout-sections button[aria-current="page"] { background: #123b36; color: #fff; }
+.student-guide-panel { display: grid; gap: 10px; margin-top: 12px; }
+.student-guide-panel > p { margin: 0 0 4px; }
+.student-guide-panel details, .student-cardio-program { border: 1px solid #dbe6d9; border-radius: 12px; background: #f8faf7; }
+.student-guide-panel summary, .student-cardio-program summary { padding: 14px 16px; cursor: pointer; font-weight: 700; }
+.student-guide-panel details p { margin: 0; padding: 0 16px 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.student-cardio-program { margin: 12px 0; }
+.student-cardio-program ol { margin: 0; padding: 0 14px 14px; list-style: none; }
+.student-cardio-program li { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 10px 2px; border-top: 1px solid #dbe6d9; font-size: .9rem; }
+.cardio-steps-editor { margin: 12px 0; padding: 14px; border: 1px solid #dbe6d9; border-radius: 12px; background: #f8faf7; }
+.cardio-steps-editor > p { margin: 5px 0 14px; }
+.cardio-step-row { display: grid; grid-template-columns: 70px repeat(4,minmax(0,1fr)) auto; gap: 8px; align-items: end; padding: 12px 0; border-top: 1px solid #dbe6d9; }
+.cardio-step-row > span { align-self: center; font-weight: 700; }
+.cardio-step-row label { min-width: 0; font-size: .85rem; }
+.cardio-step-row input { width: 100%; }
+@media (max-width: 700px) { .cardio-step-row { grid-template-columns: repeat(2,minmax(0,1fr)); } .cardio-step-row > span { grid-column: 1 / -1; } .student-cardio-program li { grid-template-columns: 1fr 1fr; } }

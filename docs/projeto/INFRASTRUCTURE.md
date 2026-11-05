@@ -1,5 +1,7 @@
 # Infraestrutura e operação
 
+**CONFIRMADO EM 2026-11-04:** Supabase Cloud de teste recebeu migrations `20261104010000` a `20261104030000` e nova versão do treino do Jean com cardio. A atualização de dados foi feita sem reset e sem seed. O deploy do frontend é feito com URL e chave publicável do projeto remoto; nenhuma chave privilegiada entra no bundle.
+
 ## Estado
 
 **CONFIRMADO:** `supabase/config.toml` configura o stack local via CLI/Docker; `.github/workflows/ci.yml` executa instalação, lint, testes de frontend e build. O Supabase Cloud de teste foi criado em São Paulo e recebeu as migrations e os dados locais. Cloudflare Pages está conectado ao GitHub e responde em `https://personalfit-bd3.pages.dev/`; domínio próprio ainda não foi configurado.

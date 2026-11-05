@@ -1,5 +1,11 @@
 # Dívida técnica e riscos abertos
 
+**PENDENTE EM 2026-11-04:** testar no celular real a leitura da programação de cardio e a navegação entre Treino e Orientações. Repetir o E2E extenso de treino com diagnóstico de duração; ele excedeu 150 segundos nesta rodada. O profissional ainda precisa redigir e publicar cada seção complementar que queira exibir; o sistema não deve preencher conteúdo clínico fictício. Verificar o gatilho automático GitHub → Cloudflare Pages, que já falhou em rodadas anteriores.
+
+**PENDENTE — PREPARAÇÃO E CARDIO:** conferir o fluxo publicado em celular real. A conclusão simples registra a confirmação do aluno, sem comprovar duração. Avaliar com profissionais se o cardio precisará de outras medidas além da duração realizada, preservando as versões publicadas.
+
+**PENDENTE — COMPATIBILIDADE LOCAL:** aplicar também `20261104020000` junto com a publicação de preparação simples no Cloud. Repetir o E2E de treino após o timeout intermitente da rodada local; o pgTAP de compatibilidade legada já passou.
+
 Este arquivo não chama de dívida algo que ainda não foi implementado. Ele registra escolhas adiadas e riscos para evitar esquecimento.
 
 | Item | Classificação | Condição para resolver |
@@ -54,3 +60,5 @@ Este arquivo não chama de dívida algo que ainda não foi implementado. Ele reg
 **DECISÃO APROVADA — ANAMNESE CONFIGURÁVEL:** o personal define seu formulário inicial e o aluno responde ao iniciar o plano. **PENDENTE:** contrato versionado de perguntas e respostas, estados rascunho/enviado/revisado, perguntas obrigatórias e condicionais, limites de dados sensíveis, acesso estrito por profissional/aluno, consentimento, retenção, revisão humana e eventual encaminhamento ao nutricionista somente com permissão específica. O painel atual usa apenas atividade do treino e não substitui anamnese ou avaliação profissional.
 
 **PENDENTE — ACOMPANHAMENTO:** os indicadores atuais de sete dias são sinais simples; definir com profissionais quais metas e alertas fazem sentido por aluno, sem presumir frequência semanal. O atalho “fazer depois” reorganiza apenas a sessão aberta; após recarga o item permanece pendente, mas a posição temporária da fila não é persistida. Migration e frontend foram publicados no ambiente de teste em 2026-11-04. Validar uso e som em celular real antes do piloto e corrigir o gatilho automático GitHub → Cloudflare.
+
+**PENDENTE — ALERTA DE DESCANSO NO CELULAR:** confirmar volume do novo aviso original e vibração em Chrome Android/PWA, com a tela visível e em segundo plano. A reprodução de áudio e a vibração com tela bloqueada ou outro app aberto não são garantidas por esta implementação web; qualquer promessa de alerta confiável nessas condições exigirá outra solução técnica e validação em aparelhos reais.

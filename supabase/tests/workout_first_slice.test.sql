@@ -252,6 +252,66 @@ select is(public.sync_workout_day_session('11111111-ffff-4fff-8fff-ffffffffffb9'
   (select id from public.workout_plan_versions where version_number=4),1,
   '[{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":1,"durationSeconds":20}]'::jsonb,'PARTIAL',
   '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-03'),true,'preparation records only its prescribed time');
+select is(public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc1','11111111-cccc-4ccc-8ccc-ccccccccccd1',
+  (select id from public.workout_plan_versions where version_number=4),1,
+  '[{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":1,"completed":true},{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":2,"completed":true}]'::jsonb,'COMPLETED',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-10',now(),now(),60,'{}'::jsonb,'{}'::jsonb),true,'one-tap preparation completes all stages without invented duration');
+select is((select entries->0->>'completed' from public.workout_sessions where id='11111111-cccc-4ccc-8ccc-ccccccccccd1'),'true','completion flag is retained in history');
+select throws_ok($$select public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc2','11111111-cccc-4ccc-8ccc-ccccccccccd2',
+  (select id from public.workout_plan_versions where version_number=4),1,
+  '[{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":1,"completed":true,"loadKg":1}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-17',now(),now(),60,'{}'::jsonb,'{}'::jsonb)$$,'22023',null,'one-tap preparation refuses fabricated load');
+select throws_ok($$select public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc3','11111111-cccc-4ccc-8ccc-ccccccccccd3',
+  (select id from public.workout_plan_versions where version_number=3),1,
+  '[{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":1,"completed":true}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-17',now(),now(),60,'{}'::jsonb,'{}'::jsonb)$$,'22023',null,'series cannot be marked without measurement');
+
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111101',true);
+reset role;
+insert into public.exercise_library(id,tenant_id,name,instructions,muscle_group) values
+  ('11111111-eeee-4eee-8eee-eeeeeeeeeeec','11111111-0000-4000-8000-000000000001','Cardio fictício','','CARDIO');
+set local role authenticated;
+update public.workout_plans set draft=jsonb_set(draft,'{days,0,items}',draft#>'{days,0,items}' ||
+  '[{"id":"11111111-1111-4111-8111-1111111111c1","exerciseId":"11111111-eeee-4eee-8eee-eeeeeeeeeeec","sets":1,"reps":"25 min","cardioMinutes":25,"targetKind":"TIME","recordingStyle":"CARDIO","restSeconds":0}]'::jsonb)
+  where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11';
+update public.workout_plans set draft=jsonb_set(jsonb_set(draft,'{guides}',
+  '{"COMO_USAR":"Guia fictício individual."}'::jsonb),'{days,0,items,1,cardioSteps}',
+  '[{"startMinute":0,"endMinute":10,"inclinePercent":4,"speedKmh":4.5},{"startMinute":10,"endMinute":25,"inclinePercent":7,"speedKmh":4.7}]'::jsonb)
+  where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11';
+select is(public.workout_cardio_steps_valid('[{"startMinute":0,"endMinute":10,"inclinePercent":4,"speedKmh":4.5},{"startMinute":11,"endMinute":25,"inclinePercent":7,"speedKmh":4.7}]'::jsonb,25),false,'cardio rejects a gap in intervals');
+select is(public.workout_cardio_steps_valid('[{"startMinute":0,"endMinute":25,"inclinePercent":31,"speedKmh":4.5}]'::jsonb,25),false,'cardio rejects excess incline');
+select is(public.workout_guides_valid('{"UNTRUSTED":"texto"}'::jsonb),false,'unknown guide category is rejected');
+select is(public.publish_workout_plan('11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11') is not null,true,'coach publishes cardio in the day sequence');
+select is((select snapshot#>>'{days,0,items,1,cardioMinutes}' from public.workout_plan_versions where version_number=5),'25','published cardio target is immutable');
+select is((select snapshot#>>'{days,0,items,1,cardioSteps,1,speedKmh}' from public.workout_plan_versions where version_number=5),'4.7','published cardio intervals are immutable');
+select is((select snapshot#>>'{guides,COMO_USAR}' from public.workout_plan_versions where version_number=5),'Guia fictício individual.','only filled guide is published');
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
+select is(public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc4','11111111-cccc-4ccc-8ccc-ccccccccccd4',
+  (select id from public.workout_plan_versions where version_number=5),1,
+  '[{"itemId":"11111111-1111-4111-8111-1111111111c1","setNumber":1,"durationSeconds":1500}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-24',now(),now(),1500,'{}'::jsonb,'{}'::jsonb),true,'student records cardio minutes as seconds in the same session');
+select throws_ok($$select public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc5','11111111-cccc-4ccc-8ccc-ccccccccccd5',
+  (select id from public.workout_plan_versions where version_number=5),1,
+  '[{"itemId":"11111111-1111-4111-8111-1111111111c1","setNumber":1,"durationSeconds":1500,"rir":2}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-12-01',now(),now(),1500,'{}'::jsonb,'{}'::jsonb)$$,'22023',null,'cardio rejects strength effort field');
+select throws_ok($$select public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc6','11111111-cccc-4ccc-8ccc-ccccccccccd6',
+  (select id from public.workout_plan_versions where version_number=5),1,
+  '[{"itemId":"11111111-1111-4111-8111-1111111111c1","setNumber":1,"durationSeconds":14460}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-12-01',now(),now(),1500,'{}'::jsonb,'{}'::jsonb)$$,'22023',null,'cardio rejects more than 240 minutes');
+
+reset role;
+update public.workout_plan_versions set snapshot=jsonb_set(snapshot,'{days,0,items,0}',
+  ((snapshot#>'{days,0,items,0}')::jsonb - 'recordingStyle') || '{"name":"Alongamento fictício"}'::jsonb)
+  where version_number=4 and tenant_id='11111111-0000-4000-8000-000000000001';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
+select is(public.sync_workout_day_session_v3('11111111-ffff-4fff-8fff-ffffffffffc7','11111111-cccc-4ccc-8ccc-ccccccccccd7',
+  (select id from public.workout_plan_versions where version_number=4),1,
+  '[{"itemId":"11111111-1111-4111-8111-111111111199","setNumber":1,"completed":true}]'::jsonb,'PARTIAL',
+  '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-12-08',now(),now(),60,'{}'::jsonb,'{}'::jsonb),true,
+  'legacy published stretch without load accepts one-tap completion');
+select is((select snapshot#>>'{days,0,items,0,recordingStyle}' from public.workout_plan_versions where version_number=4),
+  null,'legacy snapshot remains without recording style');
 
 reset role;
 update public.students set status='INACTIVE' where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
