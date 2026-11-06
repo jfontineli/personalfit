@@ -1,6 +1,6 @@
 # Infraestrutura e operação
 
-**CONFIRMADO EM 2026-11-04:** Supabase Cloud de teste recebeu migrations `20261104010000` a `20261104030000` e nova versão do treino do Jean com cardio. A atualização de dados foi feita sem reset e sem seed. O deploy do frontend é feito com URL e chave publicável do projeto remoto; nenhuma chave privilegiada entra no bundle.
+**CONFIRMADO EM 2026-11-04:** Supabase Cloud de teste recebeu migrations `20261104010000` a `20261104030000` e nova versão do treino do Jean com cardio. A atualização de dados foi feita sem reset e sem seed. O commit `9efd6f9` foi enviado ao GitHub. O bundle compilado com URL e chave publicável do projeto remoto foi publicado via Wrangler no Cloudflare Pages; não contém chave secreta. A URL principal `https://personalfit-bd3.pages.dev/`, `/login`, `/aluno/inicio`, manifest e service worker retornaram HTTP 200, com o bundle novo na página principal. O deploy automático GitHub → Pages continua sem confirmação.
 
 ## Estado
 

@@ -1,8 +1,8 @@
 # Dívida técnica e riscos abertos
 
-**PENDENTE EM 2026-11-04:** testar no celular real a leitura da programação de cardio e a navegação entre Treino e Orientações. Repetir o E2E extenso de treino com diagnóstico de duração; ele excedeu 150 segundos nesta rodada. O profissional ainda precisa redigir e publicar cada seção complementar que queira exibir; o sistema não deve preencher conteúdo clínico fictício. Verificar o gatilho automático GitHub → Cloudflare Pages, que já falhou em rodadas anteriores.
+**PENDENTE EM 2026-11-05:** o usuário concluiu o teste do item 1 no celular. A versão 3 já contém os oito conteúdos complementares e oito trocas aprovadas; falta o teste humano específico dessas duas entregas. Repetir o E2E extenso de treino com diagnóstico de duração, pois ele excedeu 150 segundos na rodada automatizada. Verificar também o gatilho automático GitHub → Cloudflare Pages, que já falhou em rodadas anteriores.
 
-**PENDENTE — PREPARAÇÃO E CARDIO:** conferir o fluxo publicado em celular real. A conclusão simples registra a confirmação do aluno, sem comprovar duração. Avaliar com profissionais se o cardio precisará de outras medidas além da duração realizada, preservando as versões publicadas.
+**CONFIRMADO PARA A ETAPA — PREPARAÇÃO E CARDIO:** o usuário testou o item 1 no celular em 2026-11-05. A conclusão simples continua registrando a confirmação do aluno, sem comprovar duração. **PENDENTE:** avaliar com profissionais se o cardio precisará de outras medidas além da duração realizada, preservando as versões publicadas.
 
 **PENDENTE — COMPATIBILIDADE LOCAL:** aplicar também `20261104020000` junto com a publicação de preparação simples no Cloud. Repetir o E2E de treino após o timeout intermitente da rodada local; o pgTAP de compatibilidade legada já passou.
 
