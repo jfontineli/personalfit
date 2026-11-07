@@ -52,6 +52,8 @@
 
 **CONFIRMADO NO CICLO ATUAL:** repetições ou segundos, carga opcional e repetições que sobrariam opcionais por série são gravados com a operação pendente na mesma transação IndexedDB. Reenvio da mesma operação mantém uma única sessão no servidor. A versão de uma sessão iniciada não muda se outra for publicada. Dia completo exige todas as séries; dia encerrado com faltas fica `PARTIAL` e não conta como completo. Placa, pulo explícito de exercício e relatório de frequência ainda não foram implementados.
 
+**DECISÃO APROVADA EM 2026-11-07 — SEQUÊNCIA SEMANAL:** a semana do treino é uma etapa da prescrição, não um bloqueio pelo calendário. Depois que todos os dias da etapa estiverem encerrados como completos ou parciais, o aluno pode iniciar imediatamente a próxima semana lógica. A aplicação libera somente a próxima etapa, respeita a duração máxima das versões com ciclo definido e mantém as etapas anteriores em consulta.
+
 **CONFIRMADO EM 2026-11-02:** descanso prescrito e tipo/alvo de cada série aparecem no treino; RIR opcional pode ser lançado e sincronizado. Observação individual não é gravada na biblioteca reutilizável. Rascunho marcado para revisão não pode ser publicado até o profissional declarar a revisão concluída e salvar/publicar o plano.
 
 **CONFIRMADO EM 2026-11-02:** o profissional escolhe no item prescrito entre série de treino e preparação. Preparação usa etapas com tempo ou repetições, sem campo de carga ou RIR; o servidor também rejeita esses campos nas novas versões. Após o último registro de um exercício, a interface avança para o próximo exercício pendente do dia. O aluno ainda pode abrir outro exercício manualmente.

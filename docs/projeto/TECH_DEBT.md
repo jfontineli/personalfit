@@ -51,7 +51,9 @@ Este arquivo não chama de dívida algo que ainda não foi implementado. Ele reg
 
 **PENDENTE:** a fila de treino envia ao voltar online e expõe pendência/erro; faltam reconciliação entre dispositivos, recuperação de erro permanente, retenção de recibos e política de operações após inativação. A fila do diagnóstico técnico permanece separada. O ícone PWA é temporário. Essas pendências precisam ser resolvidas antes de dados reais ou piloto.
 
-**PENDENTE:** sessões anteriores à identificação de dia/semana permanecem sem essa classificação; não foram inferidas a partir de séries antigas. A navegação usa a versão atualmente publicada e não oferece histórico completo de versões antigas nem correção retroativa. A regra para repetir um mesmo dia na mesma semana exige desenho funcional. **DECISÃO APROVADA:** a prévia da experiência do aluno antes de publicar não integra esta rodada e permanece pendente.
+**PENDENTE:** sessões anteriores à identificação de dia/semana permanecem sem essa classificação; não foram inferidas a partir de séries antigas. A navegação usa a versão atualmente publicada e não oferece histórico completo de versões antigas nem correção retroativa. O avanço para a próxima semana após todos os dias terminais foi implementado; repetir isoladamente um mesmo dia já encerrado ainda exige desenho funcional. **DECISÃO APROVADA:** a prévia da experiência do aluno antes de publicar não integra esta rodada e permanece pendente.
+
+**PENDENTE EM 2026-11-07 — AMBIENTE DE TESTES JS:** corrigir a árvore instalada que faz o jsdom carregar `@exodus/bytes` ESM por `require`. O teste unitário novo passou isoladamente com ambiente Node, e lint/build passaram, mas a suíte Vitest completa precisa voltar a iniciar antes do próximo fechamento técnico.
 
 **CONFIRMADO:** o bloqueio de validação da Fase 2 foi resolvido: Docker Desktop voltou a funcionar e migration, seed, pgTAP, login e E2E passaram. O host ainda tem pouco espaço livre em C:; o serviço Vector local reinicia por não alcançar a origem de logs do Docker. Monitorar capacidade e logs antes do piloto; esses pontos não invalidaram os serviços técnicos necessários da Fase 2.1.
 

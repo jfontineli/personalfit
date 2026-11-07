@@ -5,6 +5,7 @@ import { getCurrentWorkout, getStudentExerciseVideos, getWorkoutVersion, listWor
   type WorkoutEntry, type WorkoutSession, type WorkoutVersion } from '../services/workouts'
 import { InstructionVideo } from './Workouts'
 import { workoutGuideSections } from './workoutGuides'
+import { availableTrainingWeek, shiftWorkoutWeek } from './workoutCalendar'
 
 const messageOf = (error: unknown) => error instanceof Error ? error.message : 'Não foi possível concluir a operação.'
 function monday(date: Date) {
@@ -13,9 +14,7 @@ function monday(date: Date) {
   return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
 }
 function shiftWeek(iso: string, weeks: number) {
-  const date = new Date(`${iso}T12:00:00`)
-  date.setDate(date.getDate() + weeks * 7)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  return shiftWorkoutWeek(iso, weeks)
 }
 function cycleWeek(start: string, today = new Date()) {
   const first = new Date(`${start}T12:00:00`)
@@ -258,12 +257,22 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const completedCount = displayed?.snapshot.days.filter(item => completed(item.id)).length ?? 0
   const partialCount = displayed?.snapshot.days.filter(item => partial(item.id)).length ?? 0
   const cycleStart = displayed?.snapshot.startsOn
-  const currentWeek = cycleStart ? shiftWeek(cycleStart, Math.max(0, Math.min(cycleWeek(cycleStart), (displayed?.snapshot.durationWeeks ?? 1) - 1))) : monday(new Date())
-  const firstWeek = cycleStart ?? (displayed ? monday(new Date(displayed.published_at)) : currentWeek)
-  const lastWeek = cycleStart ? shiftWeek(cycleStart, (displayed?.snapshot.durationWeeks ?? 1) - 1) : currentWeek
+  const calendarWeek = cycleStart ? shiftWeek(cycleStart, Math.max(0, Math.min(cycleWeek(cycleStart), (displayed?.snapshot.durationWeeks ?? 1) - 1))) : monday(new Date())
+  const firstWeek = cycleStart ?? (displayed ? monday(new Date(displayed.published_at)) : calendarWeek)
+  const prescribedLastWeek = cycleStart ? shiftWeek(cycleStart, (displayed?.snapshot.durationWeeks ?? 1) - 1) : undefined
+  const allSessions = [...localSessions, ...historySessions]
+  const activeTrainingWeek = displayed ? availableTrainingWeek({
+    calendarWeek,
+    firstWeek,
+    lastWeek: prescribedLastWeek,
+    versionId: displayed.id,
+    dayIds: displayed.snapshot.days.map(item => item.id),
+    sessions: allSessions,
+  }) : calendarWeek
+  const lastNavigableWeek = prescribedLastWeek ?? activeTrainingWeek
   const weekNumber = cycleStart ? Math.floor((new Date(`${weekStart}T12:00:00`).getTime() - new Date(`${cycleStart}T12:00:00`).getTime()) / 604800000) + 1 : null
-  const isCurrentWeek = weekStart === currentWeek
-  const canStart = isCurrentWeek && (!cycleStart || new Date(`${cycleStart}T00:00:00`) <= new Date()) && (!cycleStart || cycleWeek(cycleStart) < (displayed?.snapshot.durationWeeks ?? 0))
+  const isActiveWeek = weekStart === activeTrainingWeek
+  const canStart = isActiveWeek && (!cycleStart || new Date(`${cycleStart}T00:00:00`) <= new Date())
   const done = active?.status === 'COMPLETED' || selectedRemote?.status === 'COMPLETED'
   const partiallyDone = active?.status === 'PARTIAL' || selectedRemote?.status === 'PARTIAL'
   const remoteOnly = !active && (selectedRemote?.status === 'IN_PROGRESS' || selectedRemote?.status === 'PAUSED')
@@ -393,12 +402,13 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
       {displayed.snapshot.importantNote && <div className="student-important-note"><strong>Antes de começar</strong><p>{displayed.snapshot.importantNote}</p></div>}
       <div className="student-week-nav" aria-label="Semana do treino">
         <button type="button" className="secondary-button" disabled={weekStart <= firstWeek} onClick={() => setWeekStart(shiftWeek(weekStart, -1))} aria-label="Semana anterior">‹</button>
-        <div><strong>{weekNumber ? `Semana ${weekNumber} de ${displayed.snapshot.durationWeeks}` : isCurrentWeek ? 'Esta semana' : 'Semana selecionada'}</strong><small>{weekLabel(weekStart)} · {completedCount} completos{partialCount ? ` · ${partialCount} parciais` : ''}</small></div>
-        <button type="button" className="secondary-button" disabled={weekStart >= lastWeek} onClick={() => setWeekStart(shiftWeek(weekStart, 1))} aria-label="Próxima semana">›</button>
+        <div><strong>{weekNumber ? `Semana ${weekNumber} de ${displayed.snapshot.durationWeeks}` : isActiveWeek ? 'Semana atual do treino' : 'Semana anterior do treino'}</strong><small>{weekLabel(weekStart)} · {completedCount} completos{partialCount ? ` · ${partialCount} parciais` : ''}</small></div>
+        <button type="button" className="secondary-button" disabled={weekStart >= lastNavigableWeek} onClick={() => setWeekStart(shiftWeek(weekStart, 1))} aria-label="Próxima semana">›</button>
       </div>
+      {weekStart < activeTrainingWeek && <div className="feedback"><p>A sequência anterior foi encerrada. Você já pode começar a próxima semana do treino.</p><button type="button" className="secondary-button" onClick={() => { setWeekStart(activeTrainingWeek); setDayId(''); setEdits({}) }}>Ir para a próxima semana</button></div>}
       <nav className="student-day-tabs" aria-label="Dias do treino">{displayed.snapshot.days.map((item, index) => <button key={item.id} type="button"
         className={`${item.id === effectiveDayId ? 'is-active ' : ''}${completed(item.id) ? 'is-complete' : partial(item.id) ? 'is-partial' : ''}`} aria-current={item.id === effectiveDayId ? 'page' : undefined} onClick={() => { setDayId(item.id); setEdits({}); setExpandedExerciseId(null) }}>
-        <span>Dia {index + 1}</span><strong>{item.name}</strong><small>{completed(item.id) ? '✓ Concluído' : partial(item.id) ? 'Encerrado incompleto' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') ? 'Pausado · continue quando puder' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') ? 'Em andamento' : isCurrentWeek && item.id === nextDayId ? `Próximo · ${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}` : `${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}`}</small>
+        <span>Dia {index + 1}</span><strong>{item.name}</strong><small>{completed(item.id) ? '✓ Concluído' : partial(item.id) ? 'Encerrado incompleto' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') ? 'Pausado · continue quando puder' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') ? 'Em andamento' : isActiveWeek && item.id === nextDayId ? `Próximo · ${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}` : `${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}`}</small>
       </button>)}</nav>
       {day && <div className="student-day-panel"><div className="student-day-title"><div><span className="eyebrow">DIA {displayed.snapshot.days.indexOf(day) + 1}</span><h4>{day.name}</h4><p>{day.items.length} {day.items.length === 1 ? 'exercício' : 'exercícios'} · {done ? 'Concluído' : partiallyDone ? 'Encerrado incompleto' : active?.status === 'PAUSED' ? 'Pausado' : active?.status === 'IN_PROGRESS' ? 'Em andamento' : 'Pronto para começar'}</p></div></div>
         {(active || selectedRemote) && <div className="student-day-progress"><strong>{day.items.filter(item => (active?.entries ?? selectedRemote?.entries ?? []).filter(entry => entry.itemId === item.id).length === item.sets).length} de {day.items.length} exercícios registrados</strong><progress max={day.items.length} value={day.items.filter(item => (active?.entries ?? selectedRemote?.entries ?? []).filter(entry => entry.itemId === item.id).length === item.sets).length} /></div>}

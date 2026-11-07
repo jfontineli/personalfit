@@ -17,3 +17,7 @@ A prévia da experiência do aluno antes da publicação foi excluída desta rod
 ## Consequências
 
 Sessões e versões antigas não são alteradas ou retroativamente classificadas. A interface ainda não oferece repetição ou correção de dia concluído, placa, timer, frequência calculada nem histórico completo de todas as versões. A política de conflito entre aparelhos continua pendente.
+
+## Complemento aprovado em 2026-11-07
+
+`COMPLETED` e `PARTIAL` encerram um dia para fins de avanço da sequência. Quando todos os dias da semana lógica estão em um desses estados, a próxima semana do treino fica disponível imediatamente, sem depender da próxima segunda-feira civil. Planos com duração prescrita nunca avançam além da última semana; versões legadas sem duração avançam somente uma semana por vez e apenas após o encerramento de todos os dias. Semanas anteriores permanecem disponíveis somente para consulta.
