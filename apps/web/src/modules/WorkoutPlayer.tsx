@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { adoptRemoteWorkoutSession, cacheWorkout, confirmWorkoutOperation, flagWorkoutOperation, getCachedWorkout,
   listLocalSessions, pendingWorkoutOperations, saveLocalWorkoutSession } from '../offline/workoutStore'
 import { getCurrentWorkout, getStudentExerciseVideos, getWorkoutVersion, listWorkoutSessions, listWorkoutSessionsForWeek, syncWorkoutSession,
@@ -125,6 +125,7 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const [swapOpenId, setSwapOpenId] = useState('')
   const [deferred, setDeferred] = useState<{ sessionId: string; itemIds: string[] }>({ sessionId: '', itemIds: [] })
   const [view, setView] = useState<'TREINO' | 'ORIENTACOES'>('TREINO')
+  const initializedVersionId = useRef('')
 
   const refreshQueue = useCallback(async () => {
     const operations = await pendingWorkoutOperations(userId, tenantId)
@@ -209,6 +210,8 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
 
   useEffect(() => {
     if (!current) return
+    if (initializedVersionId.current === current.id) return
+    initializedVersionId.current = current.id
     const start = current.snapshot.startsOn
     const index = start ? Math.min(cycleWeek(start), (current.snapshot.durationWeeks ?? 1) - 1) : 0
     const timer = window.setTimeout(() => setWeekStart(start ? shiftWeek(start, Math.max(0, index)) : monday(new Date())), 0)
