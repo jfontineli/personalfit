@@ -21,3 +21,5 @@ Sessões e versões antigas não são alteradas ou retroativamente classificadas
 ## Complemento aprovado em 2026-11-07
 
 `COMPLETED` e `PARTIAL` encerram um dia para fins de avanço da sequência. Quando todos os dias da semana lógica estão em um desses estados, a próxima semana do treino fica disponível imediatamente, sem depender da próxima segunda-feira civil. Planos com duração prescrita nunca avançam além da última semana; versões legadas sem duração avançam somente uma semana por vez e apenas após o encerramento de todos os dias. Semanas anteriores permanecem disponíveis somente para consulta.
+
+A publicação de uma nova versão durante ou depois da semana não reinicia seu progresso. Sessões terminais de versões anteriores contam para encerrar a mesma sequência quando preservam os IDs dos dias; a semana seguinte começa com a versão atualmente atribuída. O histórico de cada sessão continua vinculado à versão efetivamente executada.

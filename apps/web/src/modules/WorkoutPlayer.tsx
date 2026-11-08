@@ -265,7 +265,6 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
     calendarWeek,
     firstWeek,
     lastWeek: prescribedLastWeek,
-    versionId: displayed.id,
     dayIds: displayed.snapshot.days.map(item => item.id),
     sessions: allSessions,
   }) : calendarWeek

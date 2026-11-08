@@ -11,10 +11,9 @@ export function shiftWorkoutWeek(iso: string, weeks: number) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-function weekIsClosed(week: string, versionId: string, dayIds: string[], sessions: WorkoutWeekSession[]) {
+function weekIsClosed(week: string, dayIds: string[], sessions: WorkoutWeekSession[]) {
   return dayIds.length > 0 && dayIds.every(dayId => sessions.some(session =>
-    session.version_id === versionId
-    && session.week_start === week
+    session.week_start === week
     && session.day_id === dayId
     && (session.status === 'COMPLETED' || session.status === 'PARTIAL')))
 }
@@ -23,14 +22,12 @@ export function availableTrainingWeek({
   calendarWeek,
   firstWeek,
   lastWeek,
-  versionId,
   dayIds,
   sessions,
 }: {
   calendarWeek: string
   firstWeek: string
   lastWeek?: string
-  versionId: string
   dayIds: string[]
   sessions: WorkoutWeekSession[]
 }) {
@@ -39,7 +36,7 @@ export function availableTrainingWeek({
 
   // A legacy plan may not have a prescribed duration. The guard prevents
   // malformed imported data from causing an unbounded scan.
-  for (let count = 0; count < 104 && weekIsClosed(available, versionId, dayIds, sessions); count += 1) {
+  for (let count = 0; count < 104 && weekIsClosed(available, dayIds, sessions); count += 1) {
     const next = shiftWorkoutWeek(available, 1)
     if (lastWeek && next > lastWeek) break
     available = next
