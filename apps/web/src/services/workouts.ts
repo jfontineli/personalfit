@@ -41,6 +41,16 @@ export function normalizeYoutubeUrl(input: string): string {
   return `https://www.youtube.com/watch?v=${videoId}`
 }
 
+export function youtubeThumbnailUrl(input: string): string | null {
+  if (!input || input.startsWith('storage:')) return null
+  try {
+    const videoId = new URL(normalizeYoutubeUrl(input)).searchParams.get('v')
+    return videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : null
+  } catch {
+    return null
+  }
+}
+
 export async function listExercises(tenantId: string): Promise<Exercise[]> {
   const { data, error } = await client().from('exercise_library').select('id,tenant_id,name,instructions,video_url,muscle_group').eq('tenant_id', tenantId).order('name')
   return result(data ?? [], error) as Exercise[]

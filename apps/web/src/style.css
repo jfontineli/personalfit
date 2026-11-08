@@ -291,6 +291,14 @@ code { overflow-wrap: anywhere; }
 .student-experience .student-day-panel > button:hover, .student-experience .workout-set > button:not(.text-button):hover, .student-experience .student-finish > button:not(.secondary-button):hover { filter: brightness(.92); }
 .student-experience .student-exercise-number { background: color-mix(in srgb, var(--student-accent) 12%, white); color: #15332e; }
 .student-exercise-body { padding: 0 14px 16px 54px; }
+.student-exercise-media { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.student-exercise-media img { width: 112px; aspect-ratio: 16 / 9; flex: 0 0 112px; object-fit: cover; border: 1px solid #dce5d8; border-radius: 10px; background: #eef3ed; }
+.student-exercise-media .instruction-video { margin: 0; }
+.student-session-results { display: grid; gap: 8px; margin-top: 14px; padding: 14px; border: 1px solid #dce5d8; border-radius: 12px; background: #f7faf5; }
+.student-session-results > strong { font-size: .88rem; }
+.student-session-result-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 8px; border-top: 1px solid #e2e9df; }
+.student-session-result-row span { font-weight: 700; }
+.student-session-result-row small { color: #49655f; text-align: right; }
 .student-finish { display: grid; gap: 10px; margin: 18px 0; padding: 16px; border-radius: 12px; background: #f8faf7; border: 1px solid #dce5d8; }
 .student-finish p { margin: 0; }
 .student-finish > button { justify-self: start; }
@@ -378,6 +386,9 @@ code { overflow-wrap: anywhere; }
 @media (max-width: 430px) {
   .workout-set { grid-template-columns: minmax(0, 1fr); padding: 14px; }
   .student-exercise-body { padding-left: 12px; padding-right: 12px; }
+  .student-exercise-media img { width: 92px; flex-basis: 92px; }
+  .student-session-result-row { display: grid; gap: 2px; }
+  .student-session-result-row small { text-align: left; }
 }
 
 /* Nutrition uses the same cards and spacing as the existing professional and student areas. */

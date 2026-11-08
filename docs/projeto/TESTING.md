@@ -122,3 +122,5 @@
 **REGRESSÃO DA SEMANA APÓS PUBLICAÇÃO (2026-11-08):** consulta ao Cloud confirmou cinco sessões terminais na semana de 02/11 a 08/11 — uma `COMPLETED` e quatro `PARTIAL` — executadas na versão 1 enquanto a atribuição atual era a versão 4. O teste de regressão foi corrigido para exigir que essa troca de versão libere a semana seguinte sem reescrever o histórico.
 
 **REGRESSÃO DA NAVEGAÇÃO SEMANAL (2026-11-08):** a observação no navegador confirmou que a próxima semana era calculada e exibida, mas a sincronização da mesma versão executava novamente a inicialização e restaurava `02/11`. O componente passou a memorizar o ID já inicializado; somente uma versão realmente nova pode redefinir a semana inicial.
+
+**VALIDAÇÃO DE HISTÓRICO E MÍDIA (2026-11-08):** o teste unitário de links de vídeo cobre a geração da miniatura pública para URL válida do YouTube e a recusa de mídia privada ou URL inválida. A revisão do componente confirma navegação semanal apenas pelas setas e resultados históricos somente para leitura nas sessões `COMPLETED` e `PARTIAL`. A conferência visual autenticada no celular permanece necessária após a publicação.

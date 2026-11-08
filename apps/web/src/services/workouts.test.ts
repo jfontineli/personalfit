@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeYoutubeUrl } from './workouts'
+import { normalizeYoutubeUrl, youtubeThumbnailUrl } from './workouts'
 
 describe('link de vídeo do YouTube', () => {
   it('normaliza formatos comuns para um único endereço', () => {
@@ -11,5 +11,11 @@ describe('link de vídeo do YouTube', () => {
     expect(() => normalizeYoutubeUrl('https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ')).toThrow()
     expect(() => normalizeYoutubeUrl('http://youtube.com/watch?v=dQw4w9WgXcQ')).toThrow()
     expect(() => normalizeYoutubeUrl('https://youtu.be/invalido')).toThrow()
+  })
+
+  it('gera uma prévia leve apenas para vídeos públicos válidos', () => {
+    expect(youtubeThumbnailUrl('https://youtu.be/dQw4w9WgXcQ')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg')
+    expect(youtubeThumbnailUrl('storage:tenant/exercicio/video.mp4')).toBeNull()
+    expect(youtubeThumbnailUrl('https://example.com/video')).toBeNull()
   })
 })
