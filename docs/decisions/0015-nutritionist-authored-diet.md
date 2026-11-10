@@ -1,7 +1,7 @@
 # ADR 0015 — Autoria da prescrição alimentar pelo nutricionista parceiro
 
 - Data: 2026-11-03
-- Status: **DECISÃO APROVADA**; primeiro fluxo **CONFIRMADO localmente**, validação humana e implantação remota **PENDENTES**
+- Status: **DECISÃO APROVADA**
 
 ## Contexto
 
@@ -13,7 +13,7 @@ A prescrição dietética é atribuição do nutricionista, conforme a Lei 8.234
 
 O personal organiza o atendimento e pode conectar o aluno a um nutricionista parceiro. O nutricionista entra com conta própria, acessa sua área profissional restrita aos alunos a ele vinculados e nela cria, revisa e publica o plano alimentar individual. O aluno consulta o plano que lhe foi publicado e registra sua própria execução. O personal não recebe permissão de editar ou publicar prescrições dietéticas em nome do nutricionista. O superadmin não recebe acesso automático ao conteúdo clínico do tenant.
 
-Este ADR substitui a premissa genérica de “autoria profissional” dos documentos anteriores por autoria **do nutricionista** para a prescrição alimentar individual. O primeiro fluxo foi implementado localmente após a decisão; a validação clínica e a implantação remota continuam pendentes.
+Este ADR substitui a premissa genérica de “autoria profissional” dos documentos anteriores por autoria **do nutricionista** para a prescrição alimentar individual. A validação clínica exige revisão humana.
 
 ## Consequências e pontos de desenho
 
@@ -21,7 +21,7 @@ Este ADR substitui a premissa genérica de “autoria profissional” dos docume
 - **CONFIRMADO localmente:** o aluno consulta a versão publicada e registra refeições; operações offline têm ID estável, fila local e reenvio idempotente. A versão publicada permanece imutável.
 - **PENDENTE:** definir consentimento/base legal, acesso do personal a dados alimentares, retenção e auditoria com revisão humana apropriada.
 - **PENDENTE:** gerenciar a troca ou revogação do nutricionista, vigência do plano, conflitos entre dispositivos, visibilidade consensual de registros ao personal e revisão clínica antes de uso real.
-- **NECESSITA VALIDAÇÃO HUMANA:** verificar credenciais e responsabilidade do nutricionista; aprovar o conteúdo clínico, equivalência de substituições, suplementos e qualquer informação relacionada a medicamentos. A pedido explícito do usuário, a dieta individual da planilha GH foi transcrita apenas como rascunho privado local. A transcrição não equivale a prescrição nova nem pode ser publicada sem revisão explícita do nutricionista vinculado.
+- **NECESSITA VALIDAÇÃO HUMANA:** verificar credenciais e responsabilidade do nutricionista; aprovar o conteúdo clínico, equivalência de substituições, suplementos e qualquer informação relacionada a medicamentos. Conteúdo importado permanece em rascunho privado até revisão explícita do nutricionista vinculado.
 
 ## Referências normativas
 

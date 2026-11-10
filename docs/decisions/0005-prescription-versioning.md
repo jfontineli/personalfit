@@ -20,5 +20,5 @@ Separar rascunho editável, publicação imutável, atribuição ao aluno e exec
 
 - Publicação e atribuição precisam de operação controlada.
 - Histórico poderá comparar sessões contra a prescrição vigente em cada data.
-- **HIPÓTESE:** cada publicação receberá ID e número de versão por plano; o formato físico ainda não está definido.
+- **HISTÓRICO** — hipótese inicial: cada publicação receberá ID e número de versão por plano; o formato físico ainda não está definido.
 - **PENDENTE:** regras de edição de rascunho, vigência e substituição de atribuições.

@@ -40,3 +40,6 @@ supabase/.versions/
 
 # Referência fornecida apenas para análise; não distribuir assets proprietários
 referencia/
+
+# Anexos locais do Codex (capturas e gravações fora do produto)
+/.codex-attachments/

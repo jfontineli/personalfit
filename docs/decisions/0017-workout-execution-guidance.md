@@ -19,3 +19,5 @@ O treino prescrito deve continuar sob autoria do personal. Na academia, um apare
 ## Consequências
 
 As migrations `20261103070000` a `20261103110000` são aditivas, com RPC versionada e compatibilidade das operações antigas. A validação de tenant, aluno ativo, versão, dia e alternativa é feita no banco. A mídia atual da alternativa aprovada segue a autorização privada da versão atribuída; a migration `110000` corrige a validação de caminho MP4 da `100000` já aplicada. Nenhum dado da referência proprietária foi incorporado. O áudio depende das permissões e políticas do navegador; a indicação visual sempre permanece.
+
+O [ADR 0018](0018-rest-timer-and-exercise-swap-ux.md) restringe a interação de aparelho indisponível e complementa a apresentação do descanso. O contrato histórico de ocorrências permanece legível.

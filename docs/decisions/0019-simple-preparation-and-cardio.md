@@ -14,4 +14,4 @@ O aluno precisava digitar duração de cada etapa de um alongamento sem carga, e
 
 ## Consequências
 
-O cardio é uma atividade prescrita individualmente, sem geração automática. O grupo da biblioteca organiza a escolha; não pressupõe equivalência para troca. A conclusão simples comprova o toque do aluno, não a duração nem a qualidade do alongamento. Os fluxos novos estão validados no Supabase local; a publicação no Cloud requer migração e deploy posteriores.
+O cardio é uma atividade prescrita individualmente, sem geração automática. O grupo da biblioteca organiza a escolha; não pressupõe equivalência para troca. A conclusão simples comprova o toque do aluno, não a duração nem a qualidade do alongamento. A evidência por ambiente fica em [infraestrutura](../projeto/INFRASTRUCTURE.md).

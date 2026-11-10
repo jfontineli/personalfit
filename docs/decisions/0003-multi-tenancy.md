@@ -20,5 +20,5 @@ Modelar tenant, usuário, vínculo, papel, profissional e aluno separadamente. T
 
 - Todas as relações privadas, arquivos, contratos e testes precisam contemplar tenant.
 - Políticas devem negar acesso por padrão e impedir referências cruzadas.
-- **HIPÓTESE:** iniciar com schema compartilhado e `tenant_id` nas entidades privadas.
+- **HISTÓRICO** — hipótese inicial: iniciar com schema compartilhado e `tenant_id` nas entidades privadas.
 - **PENDENTE:** matriz fina de equipe, suporte excepcional e múltiplos vínculos.

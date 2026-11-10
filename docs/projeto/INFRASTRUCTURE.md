@@ -1,39 +1,23 @@
 # Infraestrutura e operação
 
-**CONFIRMADO EM 2026-11-04:** Supabase Cloud de teste recebeu migrations `20261104010000` a `20261104030000` e nova versão do treino do Jean com cardio. A atualização de dados foi feita sem reset e sem seed. O commit `9efd6f9` foi enviado ao GitHub. O bundle compilado com URL e chave publicável do projeto remoto foi publicado via Wrangler no Cloudflare Pages; não contém chave secreta. A URL principal `https://personalfit-bd3.pages.dev/`, `/login`, `/aluno/inicio`, manifest e service worker retornaram HTTP 200, com o bundle novo na página principal. O deploy automático GitHub → Pages continua sem confirmação.
+## CONFIRMADO AGORA — escopo da evidência
 
-## Estado
+O repositório configura npm workspaces, Node 24, CI GitHub Actions e Supabase local via CLI/Docker. A configuração local usa API/Auth/Storage em 54321, PostgreSQL em 54322, Studio em 54323 e email local em 54324. Cadastro local tem confirmação de email desabilitada. Consulte [config.toml](../../supabase/config.toml). O seed fictício destina-se a desenvolvimento e testes descartáveis.
 
-**CONFIRMADO:** `supabase/config.toml` configura o stack local via CLI/Docker; `.github/workflows/ci.yml` executa instalação, lint, testes de frontend e build. O Supabase Cloud de teste foi criado em São Paulo e recebeu as migrations e os dados locais. Cloudflare Pages está conectado ao GitHub e responde em `https://personalfit-bd3.pages.dev/`; domínio próprio ainda não foi configurado.
+Na auditoria de 10/11/2026, o [Pages de teste](https://personalfit-bd3.pages.dev/) respondeu HTTP 200. O HTML apontou para index-4UDQS1DH.js e index-EKvPnJqc.css; o dist web local existente referenciava index-DrQi4zVn.js e index-jLjniyJy.css. Isso identifica shells distintos. A verificação foi pública, sem autenticação ou consulta a dados privados.
 
-**CONFIRMADO NA FASE 2.1:** o stack local subiu com PostgreSQL em `127.0.0.1:54322`, API/Auth/Storage em `127.0.0.1:54321`, Studio em `127.0.0.1:54323` e caixa de e-mail local em `127.0.0.1:54324`. Auth, Storage e Studio responderam HTTP 200; o Vector de logs reinicia neste host e requer diagnóstico operacional separado.
+## HISTÓRICO — publicação e migrations
 
-## Plataforma prevista
+GitHub guarda o monorepo. O processo de teste registrado usa a branch main, raiz do projeto, npm run build e saída apps/web/dist. O build recebe apenas VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY do Supabase Cloud correspondente. O workflow versionado valida a aplicação web. Em novembro, pushes deixaram o Pages com bundle antigo e houve publicação direta via Wrangler após compilação para o projeto remoto. Não inferir deploy de um push ou CI verde.
 
-**DECISÃO APROVADA:** PWA React, Supabase Auth/Storage e PostgreSQL. Ambientes e credenciais devem ser separados. Variáveis públicas do frontend não incluem chaves privilegiadas.
+Em 02/11 houve aplicação inicial de 21 migrations em teste. Em 03/11 foram aplicadas as 12 de nutrição e execução guiada e em 04/11 as de acompanhamento e guias/cardio até 20261104030000. O procedimento registrado conferiu o projeto ligado e o dry-run, aplicou migrations sem seed/reset e verificou o resultado. Houve cópia de segurança local de banco e objetos em diretório ignorado. Nenhum dado operacional individual é necessário para repetir a verificação do schema.
 
-**DECISÃO APROVADA (ADR 0014):** GitHub guarda o monorepo; Cloudflare Pages servirá o frontend React/PWA e Supabase Cloud servirá PostgreSQL, Auth, API e Storage. O primeiro ambiente remoto será de testes, preferencialmente em São Paulo, com produção em projeto Supabase separado. A configuração do build usará somente URL e chave publicável do ambiente. Planos gratuitos são ponto de partida para testes; disponibilidade e backups para clientes reais exigem revisão antes do piloto.
+## DESCONHECIDO — estado remoto atual
 
-## Preparação para produção
+SHA implantado, ledger efetivo de migrations, configuração Auth/SMTP/MFA, grants efetivos no Cloud, restauração dos objetos e funcionamento do gatilho GitHub → Pages precisam de evidência operacional recente. Disponibilidade do shell não valida login, autorização, Storage ou sync autenticados.
 
-**PENDENTE:** validar login e RLS pelo aplicativo contra o projeto remoto, confirmar a leitura do logotipo por uma conta vinculada, verificar as variáveis públicas do build no Pages, definir estratégia de branches/ambientes, domínio próprio, convites/e-mail, monitoramento de erros, métricas de fila, backups de banco e objetos, retenção, restauração ensaiada, limites de custo e política de incidentes. Nunca aplicar o seed fictício de desenvolvimento em produção.
+## Recuperação e produção
 
-**CONFIRMADO NA CÓPIA PARA TESTES (2026-11-02):** as 21 migrations foram aplicadas no projeto remoto sem seed. A cópia dos dados de `auth.users`, `auth.identities` e `public` foi ensaiada em transação revertida e então executada. O backup completo do PostgreSQL local e uma cópia do volume de Storage foram guardados apenas em `.build-tmp/`, ignorada pelo Git. Sessões e tokens Auth locais não foram importados. Após autorização específica do usuário, o único logotipo privado foi enviado ao bucket remoto; download e SHA-256 coincidiram com o arquivo local.
+**DECISÃO APROVADA** — Produção terá projeto Supabase separado, credenciais próprias e revisão de capacidade e custos antes do piloto. **PENDENTE** — ensaio de rollback do frontend com PWA instalada e fila antiga, correção progressiva do banco, backup/restauração coordenados de PostgreSQL e objetos, domínio, monitoramento e resposta a incidentes. A troca de origem da PWA pode separar o usuário de sua fila local. Verificar sincronização e plano de transição antes de mudança de domínio.
 
-**CONFIGURAÇÃO DO CLOUDFLARE PAGES (2026-11-03):** conectar o repositório GitHub `jfontineli/personalfit` em **Workers & Pages → Create application → Pages → Import an existing Git repository**. Usar branch `main`, diretório raiz do repositório (`.`), comando `npm run build` e diretório de saída `apps/web/dist`. `.node-version` fixa Node 24. Configurar `VITE_SUPABASE_URL` com a URL do projeto Supabase de teste e `VITE_SUPABASE_PUBLISHABLE_KEY` com sua chave publicável (`sb_publishable_…`) nas variáveis de build do Pages. Não usar chave secreta. Sem `404.html` na saída, o Pages serve a SPA também nas rotas `/login`, `/admin` e `/aluno/inicio`. O domínio próprio é conectado ao projeto Pages depois da primeira publicação; a URL do GitHub Pages não é um domínio cadastrável no Cloudflare.
-
-**CONFIRMADO NA PREPARAÇÃO DO FRONTEND (2026-11-03):** lint, 12 testes unitários e build PWA passaram com as variáveis públicas do Supabase remoto. O bundle contém a URL e a chave publicável esperadas; nenhuma chave `sb_secret_` completa foi encontrada. A autenticação da máquina no Wrangler e a publicação direta ocorreram em 2026-11-04.
-
-**CONFIRMADO EM 2026-11-03, BANCO DE TESTE:** `supabase db push --linked --dry-run` listou 12 migrations pendentes de nutrição e execução guiada; `supabase db push --linked --yes` aplicou as 12 sem seed ou reset.
-
-**CONFIRMADO EM 2026-11-04, PUBLICAÇÃO DE TESTE:** o commit `9d5ace7` foi enviado à `main`; CI e GitHub Pages passaram. O projeto Cloudflare Pages `personalfit` permaneceu no build anterior após o push, apesar de indicar Git provider conectado. Após OAuth com escopos de Pages e leitura da conta, `wrangler pages deploy apps/web/dist --project-name personalfit --branch main --commit-hash 9d5ace7` publicou o build com URL e chave publicável do Supabase Cloud. `https://personalfit-bd3.pages.dev/`, `/login` e `/aluno/inicio` passaram a servir o JS/CSS novo; o CSS contém o layout compacto de nutrição. O Auth remoto respondeu HTTP 200 com chave publicável. Chrome em 390 px renderizou os campos de login sem rolagem horizontal. **PENDENTE:** diagnosticar por que o push não acionou deploy automático do Cloudflare; testar login autenticado e fluxos reais no celular.
-
-**CONFIRMADO EM 2026-11-04, ACOMPANHAMENTO PUBLICADO:** a migration `20261104000000` foi aplicada no Supabase Cloud de teste sem seed ou reset e uma segunda simulação confirmou ausência de migrations pendentes. O commit `cc6ebef` foi enviado ao GitHub. Como a URL principal ainda mostrava o JS antigo, Wrangler publicou diretamente `apps/web/dist` compilado com URL e chave publicável remotas. O deploy recebeu URL de versão `https://ada90cc5.personalfit-bd3.pages.dev`; a URL principal passou a servir o JS esperado, as rotas SPA, manifest e service worker responderam HTTP 200, e a RPC negou anônimo com HTTP 401. **PENDENTE:** login autenticado remoto, teste em celular real e conserto da implantação automática GitHub → Pages.
-
-## White-label e domínios
-
-**DECISÃO APROVADA:** marca básica é por tenant; domínio personalizado está adiado. A configuração não pode depender de um nome ou cor fixa do primeiro profissional.
-
-**HIPÓTESE:** a primeira URL usará domínio da plataforma, com identificador de tenant. Trocar a origem da PWA no futuro muda o armazenamento do navegador; a migração deve exigir sincronização prévia e orientar reinstalação.
-
-**NECESSITA VALIDAÇÃO HUMANA:** região de armazenamento, orçamento mensal, endereço comercial inicial e quem operará incidentes.
+Para cada publicação autorizada, registrar ambiente, SHA, versão do schema, identificador do bundle e validação executada. Não registrar usuários, links de convite, tokens nem conteúdo clínico. [ADR de hospedagem](../decisions/0014-cloudflare-pages-supabase-hosting.md) · [Estado atual](CURRENT_STATE.md)

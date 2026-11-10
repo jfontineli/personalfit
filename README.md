@@ -2,7 +2,7 @@
 
 **DECISÃO APROVADA:** PersonalFit é o nome temporário de um produto SaaS para profissionais de treinamento físico. Cada operação é um tenant com marca, equipe, alunos e dados isolados. O primeiro profissional será o primeiro cliente da plataforma.
 
-**ESTADO ATUAL:** a base de identidade inclui onboarding superadmin → personal → aluno, contexto de tenant, marca, convites e RLS. O primeiro ciclo de treino permite biblioteca própria, vídeo privado online, rascunho/publicação por aluno, registro de séries offline e sincronização idempotente. O primeiro fluxo de dieta inclui convite do nutricionista, prescrição versionada e consulta/registro do aluno. As migrations de nutrição e treino guiado já foram aplicadas ao Supabase Cloud de teste; validação clínica, avaliação e ampliação do acompanhamento continuam pendentes.
+**ESTADO ATUAL:** a base de identidade inclui onboarding superadmin → personal → aluno, contexto de tenant, marca, convites e RLS. O primeiro ciclo de treino permite biblioteca própria, vídeo privado online, rascunho/publicação por aluno, registro de séries offline e sincronização idempotente. O primeiro fluxo de dieta inclui convite do nutricionista, prescrição versionada e consulta/registro do aluno. Há registro histórico de aplicação dessas migrations no Supabase Cloud de teste; validação clínica, avaliação e ampliação do acompanhamento continuam pendentes.
 
 ## Comece por aqui
 
@@ -12,19 +12,19 @@
 
 ## Estrutura
 
-- `apps/web/`: aplicação React + TypeScript, mobile first e PWA, com áreas mínimas profissional/aluno.
+- `apps/web/`: aplicação React + TypeScript, mobile first e PWA, com áreas de plataforma, personal, nutricionista e aluno.
 - `supabase/`: configuração local, migration, seed e testes pgTAP.
 - `tests/`: futuras verificações de ponta a ponta, autorização e sincronização.
 - `docs/projeto/`: memória persistente do produto e do estado de implementação.
 - `docs/decisions/`: decisões de arquitetura registradas como ADRs.
-- `infra/`: futura configuração operacional.
+- `infra/`: entrada para a documentação operacional.
 - `referencia/`: material fornecido para estudo funcional. Não é código, conteúdo ou identidade visual do produto e está excluído do Git.
 
-**Hospedagem:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). O Supabase Cloud de teste recebeu o schema, contas e dados iniciais; Cloudflare Pages já serve o frontend conectado à branch `main` do GitHub. Produção terá banco separado. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md) e [INFRASTRUCTURE.md](docs/projeto/INFRASTRUCTURE.md).
+**Hospedagem:** o mesmo repositório contém o frontend (`apps/web/`) e a estrutura do backend (`supabase/`). O Pages serve o ambiente de teste. Há registros de publicação direta via Wrangler; o gatilho automático após push requer verificação. Produção terá banco separado. Consulte [ADR 0014](docs/decisions/0014-cloudflare-pages-supabase-hosting.md) e [INFRASTRUCTURE.md](docs/projeto/INFRASTRUCTURE.md).
 
 ## Execução local
 
-Use Node 24 e Docker Desktop. Execute `npm install` e `npm run db:start`. Use `npm run db:reset` apenas quando quiser recriar o banco local, pois ele apaga contas e dados locais; `npm run db:test` verifica as migrations aplicadas. Copie `.env.example` para `apps/web/.env.local` e substitua a chave pública pelo valor de `npx supabase status -o env` (chave publicável/anon local). Depois execute `npm run dev`. `npm run lint`, `npm run test` e `npm run build` validam o frontend. `npm run test:e2e` exige build e Chromium do Playwright. Veja [DEVELOPMENT.md](docs/projeto/DEVELOPMENT.md) para detalhes.
+Use Node 24 e Docker Desktop. Execute `npm install` e `npm run db:start`. Use `npm run db:reset` somente em banco local descartável, pois ele apaga contas e dados locais; `npm run db:test` verifica as migrations aplicadas. Copie `.env.example` para `apps/web/.env.local` e substitua a chave pública pelo valor de `npx supabase status -o env` (chave publicável/anon local). Depois execute `npm run dev`. `npm run lint`, `npm run test` e `npm run build` validam o frontend. `npm run test:e2e` exige build e Chromium do Playwright; as jornadas com credencial administrativa exigem backend descartável. Veja [DEVELOPMENT.md](docs/projeto/DEVELOPMENT.md) para detalhes.
 
 Use `/login` para entrar, `/admin` para o superadmin criar/listar espaços, gerar convites e gerir plano, prazo e acesso, `/ativar-profissional` para ativar o personal, `/app` para a área do personal, `/ativar` para o convite do aluno, `/aluno/inicio` para a área do aluno e `/diagnostico` para testes técnicos. “Espaço” é o nome mostrado na interface para o tenant técnico. Tipos de plano ainda não incluem preço ou cobrança. Credenciais reais não são versionadas.
 

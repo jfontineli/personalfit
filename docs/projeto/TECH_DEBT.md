@@ -1,68 +1,25 @@
-# Dívida técnica e riscos abertos
+# Dívida aberta
 
-**PENDENTE EM 2026-11-05:** o usuário concluiu o teste do item 1 no celular. A versão 3 já contém os oito conteúdos complementares e oito trocas aprovadas; falta o teste humano específico dessas duas entregas. Repetir o E2E extenso de treino com diagnóstico de duração, pois ele excedeu 150 segundos na rodada automatizada. Verificar também o gatilho automático GitHub → Cloudflare Pages, que já falhou em rodadas anteriores.
+Cada linha é **PENDENTE** até haver evidência da condição de encerramento. Impactos possíveis identificados apenas por inspeção são **INFERIDOS**.
 
-**CONFIRMADO PARA A ETAPA — PREPARAÇÃO E CARDIO:** o usuário testou o item 1 no celular em 2026-11-05. A conclusão simples continua registrando a confirmação do aluno, sem comprovar duração. **PENDENTE:** avaliar com profissionais se o cardio precisará de outras medidas além da duração realizada, preservando as versões publicadas.
-
-**PENDENTE — COMPATIBILIDADE LOCAL:** aplicar também `20261104020000` junto com a publicação de preparação simples no Cloud. Repetir o E2E de treino após o timeout intermitente da rodada local; o pgTAP de compatibilidade legada já passou.
-
-Este arquivo não chama de dívida algo que ainda não foi implementado. Ele registra escolhas adiadas e riscos para evitar esquecimento.
-
-| Item | Classificação | Condição para resolver |
+| Problema aberto | Impacto | Condição verificável de encerramento |
 |---|---|---|
-| Matriz de permissões da Fase 3 | CONFIRMADO | Implementada em RLS/grants e documentada em AUTHORIZATION.md; ampliar para módulos futuros |
-| Entrega e reenvio de convites | PENDENTE | Antes de operação com alunos reais; hoje o link é exibido para entrega manual |
-| Troca de email após ativação | PENDENTE | Definir reconciliação entre Auth, perfil e cadastro |
-| SUPER_ADMIN operacional | PENDENTE | Criação/listagem de espaços e gestão básica de plano/acesso usam RPCs auditadas; MFA, limites e operação real ainda pendentes |
-| Plano comercial e cobrança | PENDENTE | Categorias de acesso e prazo existem; definir preços, benefícios, pagamentos, renovação e avisos antes de comercializar |
-| Convite profissional | PENDENTE | Definir entrega automática, reenvio/cancelamento, expiração de tenants sem ativação e recuperação de conta |
-| Auditoria e retenção | PENDENTE | Auditoria mínima existe; definir retenção, exportação e proteção operacional |
-| Diagnóstico técnico com múltiplos tenants | PENDENTE | A fila de teste continua escolhendo o primeiro vínculo ativo; substituir por contexto explícito se esse diagnóstico continuar após a Fase 3. Não afeta dados de aluno |
-| Política de conflito entre dispositivos | PENDENTE | O primeiro ciclo recusa revisão obsoleta; definir reconciliação para dois dispositivos e ação de recuperação na interface |
-| Retenção de IDs de idempotência | PENDENTE | Recibos de sessão já existem; definir prazo e limpeza segura antes do piloto |
-| Convenção de carga versus placa | PENDENTE | Primeiro ciclo registra apenas kg; definir unidade de placa antes de adicioná-la |
-| Frequência e classificação de treino parcial | NECESSITA VALIDAÇÃO HUMANA | O status `PARTIAL` já existe e não é contado como dia completo; definir peso na frequência e correções antes dos relatórios |
-| Acesso a pendências de aluno inativado | NECESSITA VALIDAÇÃO HUMANA | Antes de liberar inativação |
-| Base legal, retenção e responsabilidade | NECESSITA VALIDAÇÃO HUMANA | Antes do piloto |
-| Backup de objetos do Storage | PENDENTE | O bucket privado de logotipos já existe; definir backup e restauração antes do piloto |
-| Validação binária de imagens | PENDENTE | O bucket limita tamanho e MIME; validar assinatura e processar imagens antes de aceitar mídia de maior risco |
-| Biblioteca e mídia próprias do profissional | CONFIRMADO primeiro ciclo | Exercício, instruções e MP4 privado implementados; melhorar edição, processamento e limites da mídia antes do piloto |
-| Revisão de prescrições importadas | CONFIRMADO no primeiro espaço local | O profissional concluiu a revisão e publicou a versão 1 de cinco dias; a trava em UI e banco continua disponível para próximos rascunhos importados |
-| Preservação histórica de conteúdo próprio | CONFIRMADO primeiro ciclo | Publicação fixa nome, instruções e referência do vídeo; exclusão de vídeo publicado é negada |
-| Plano de atendimento do aluno | PENDENTE regra comercial | Nome, vigência e estado existem sem cobrança ou bloqueio; definir tipos, serviços, avisos e efeito do vencimento |
-| Execução completa do treino | PENDENTE | Ciclo atual registra repetições ou tempo, carga opcional, RIR e resultado completo/parcial; ampliar placa, timer, pulo e frequência |
-| Mídia de exercícios | PENDENTE produção | Validar binário MP4, processar/comprimir, medir tráfego, backup/retensão e tratamento de vídeos antigos |
-| Histórico de mídia | PENDENTE | A reprodução do treino atual usa mídia atual da biblioteca; uma futura tela de histórico deve distinguir mídia atual da referência preservada na versão e definir retenção dos arquivos antigos |
-| White-label ampliado | PENDENTE | Cores, contatos e upload privado de logo existem; ampliar para foto, demais elementos e cache sem misturar tenants |
-| Autoria de treinos | DECISÃO APROVADA | O profissional cria a prescrição; não incluir sugestão ou montagem automática no MVP |
-| Subdomínio/domínio próprio | DECISÃO APROVADA: adiado | Quando plano comercial exigir |
-| Implantação remota | CONFIRMADO ambiente de teste; validação pendente | Supabase Cloud e Cloudflare Pages recebem o código atual; validar login/RLS autenticados, Storage e PWA no celular antes de usar dados reais. Corrigir o gatilho GitHub → Cloudflare, que não publicou o commit `9d5ace7` automaticamente |
-| Fixtures pgTAP dependentes do seed | PENDENTE | Tornar os testes de banco autossuficientes ou executá-los em ambiente descartável com seed, sem resetar o banco local preservado |
-| Dieta estruturada | Primeiro fluxo e E2E CONFIRMADOS localmente | Validar CRN e conteúdo por humano, troca/revogação do parceiro, vigência, conflitos entre dispositivos e consentimento de compartilhamento; ver ADR 0015 |
-| Fotos corporais | DECISÃO APROVADA: adiadas | Após política de privacidade e storage |
+| Cache de treino/alimentação após leitura negada, vazia ou revogação | Conteúdo privado desatualizado pode permanecer em tela. | Testes distinguem ausência de rede, resultado vazio e 401/403; removem a exibição indevida e preservam as operações pendentes do titular. |
+| Divergência entre perfil e membership | Convite de aluno ou reativação de cadastro pode criar vínculo ativo para perfil inativo. | pgTAP demonstra negação nas policies e RPCs afetadas, inclusive após convite e reativação. |
+| Sessão histórica somente remota pode usar a versão atual no player | Um segundo dispositivo pode mostrar itens diferentes dos executados. | Em instalação limpa, abrir sessão antiga após republicação e conferir itens e valores da versão inicial. |
+| Exclusão de vídeo referenciado somente por alternativa | Um snapshot histórico pode perder mídia privada. | Storage nega exclusão de MP4 usado só em alternativa publicada e permite excluir objeto elegível. |
+| NEEDS_ATTENTION e primeiro erro alimentar bloqueiam o restante da fila | Uma operação impede confirmações independentes. | Falha permanente fica visível e recuperável; operações independentes avançam mantendo a ordem por recurso. |
+| Confirmação alimentar compara estado/mealId sem toda a identidade da operação em tela | Pode aparecer confirmação prematura para outra data, versão ou edição posterior. | Testar confirmação atrasada, estados repetidos e duas datas/versões preservando a pendência correta. |
+| Concorrência entre abas/dispositivos e retenção dos recibos | Reenvio idempotente não resolve duas edições distintas ou sessão lógica duplicada. | Definir política de conflito e retenção e verificar concorrência, interrupção, replay e retomada com cliente antigo. |
+| CI cobre apenas frontend | Regressões de schema, RLS e jornada podem passar no PR. | Workflow executa replay em banco descartável, pgTAP e jornadas críticas com resultado visível para falhas/skips. |
+| Specs administrativos não garantem alvo descartável | Credencial/URL incorretas podem dirigir criação e limpeza a outro banco. | Pré-verificação recusa alvo não autorizado antes da primeira mutação; demonstrar em teste sem dados reais. |
+| tenant_access_allowed exposto a authenticated por UUID | Revela um sinal de estado comercial sem membership no próprio helper. | Rever superfície pública e testar mínimo privilégio mantendo as policies consumidoras. |
+| Logout, retenção e aparelho compartilhado | Dados privados e pendências sobrevivem à saída. | Política aprovada e testes para troca de conta, tenant, inativação e recuperação sem exposição ou perda. |
+| Inspeção binária e ciclo de vida de mídia | MIME declarado e extensão não garantem conteúdo; custo e retenção não estão dimensionados. | Validar arquivos no servidor, demonstrar rejeição, preservação de referências e restauração de objetos. |
+| Deploy, rollback e backups | CI verde não identifica bundle ativo; restauração conjunta de schema, objetos e cliente antigo não foi ensaiada. | Ligar SHA, bundle e ledger ao deploy, testar recuperação e documentar responsável e monitoramento. |
+| Convites, troca de email, recuperação e MFA administrativo | Entrega manual e divergências entre Auth/cadastro dificultam operação. | Aprovar fluxos e validar expiração, revogação, recuperação e bloqueio administrativo. |
+| Diagnóstico usa primeira membership ativa | Recibo técnico pode ir a outro espaço da mesma conta. | Usar contexto explícito e testar duas memberships, ou retirar o diagnóstico com decisão registrada. |
+| Indicadores de sete dias, frequência, unidades e alertas em celular | Sinais simples e áudio em segundo plano têm limites para acompanhamento. | Profissionais aprovam interpretação de parcial e unidades; testes em aparelho registram limites de som, vibração e tela bloqueada. |
+| Operação clínica, retenção e memória histórica identificável | Acesso, troca de nutricionista, revisão e descarte precisam de responsáveis. | Responsáveis validam credenciais, atribuições, conteúdo, acesso às cópias anteriores, retenção e exportação. |
 
-**CONFIRMADO LOCALMENTE:** a mesma conta pode atuar como personal e nutricionista após atribuição explícita ao aluno; ver ADR 0016. **PENDENTE:** checagem humana do CRN, fluxo de revogação e regras de substituição do responsável nutricional.
-
-**PENDENTE — DIETA GH IMPORTADA:** o rascunho local do Jean requer revisão clínica linha a linha pelo nutricionista vinculado, inclusive medicações, suplementos, exames, equivalências, datas passadas e escolha do ciclo alto/baixo. Nenhuma versão foi publicada. TypeScript, lint e build PWA completos passaram em instalação isolada; os E2E ajustados ainda precisam ser executados. A instalação de dependências no workspace principal falhou por `EPERM` em binário em uso. A migration `20261103050000` e a interface de ciclos ainda não foram implantadas no Cloud.
-
-**CONFIRMADO — ORGANIZAÇÃO DO EDITOR NUTRICIONAL:** TypeScript, lint, 13 testes unitários, build PWA e dois E2E de nutrição passaram após a reorganização da tela em etapas e cartões recolhidos. **PENDENTE:** validar a experiência com nutricionista; o rascunho importado continua sem revisão clínica e sem publicação.
-
-**CONFIRMADO LOCALMENTE — NOTAS INDIVIDUAIS:** editor por aluno e filtro de publicação foram acrescentados; o texto importado permanece separado como fonte privada. **PENDENTE:** revisão humana de cada linha clínica e do CRN, teste manual da interface com nutricionista e aplicação da migration `20261103060000` no Cloud. O rascunho real do Jean permanece sem publicação.
-
-**PENDENTE:** a fila de treino envia ao voltar online e expõe pendência/erro; faltam reconciliação entre dispositivos, recuperação de erro permanente, retenção de recibos e política de operações após inativação. A fila do diagnóstico técnico permanece separada. O ícone PWA é temporário. Essas pendências precisam ser resolvidas antes de dados reais ou piloto.
-
-**PENDENTE:** sessões anteriores à identificação de dia/semana permanecem sem essa classificação; não foram inferidas a partir de séries antigas. A navegação usa a versão atualmente publicada e não oferece histórico completo de versões antigas nem correção retroativa. O avanço para a próxima semana após todos os dias terminais foi implementado; repetir isoladamente um mesmo dia já encerrado ainda exige desenho funcional. **DECISÃO APROVADA:** a prévia da experiência do aluno antes de publicar não integra esta rodada e permanece pendente.
-
-**PENDENTE EM 2026-11-07 — AMBIENTE DE TESTES JS:** corrigir a árvore instalada que faz o jsdom carregar `@exodus/bytes` ESM por `require`. O teste unitário novo passou isoladamente com ambiente Node, e lint/build passaram, mas a suíte Vitest completa precisa voltar a iniciar antes do próximo fechamento técnico.
-
-**CONFIRMADO:** o bloqueio de validação da Fase 2 foi resolvido: Docker Desktop voltou a funcionar e migration, seed, pgTAP, login e E2E passaram. O host ainda tem pouco espaço livre em C:; o serviço Vector local reinicia por não alcançar a origem de logs do Docker. Monitorar capacidade e logs antes do piloto; esses pontos não invalidaram os serviços técnicos necessários da Fase 2.1.
-
-**CONFIRMADO LOCALMENTE — TREINO GUIADO:** alternativa aprovada por item, mídia privada da alternativa, aviso de aparelho indisponível, pausa retomável, tempo ativo, descanso, última carga e progresso visual foram implementados e percorridos pelo E2E. **PENDENTE:** aplicar migrations e frontend no Cloud, testar som/vibração e cronômetro em celular real, decidir repetição do mesmo dia na semana, recuperar conflitos entre dois dispositivos, histórico completo de versões e exibir corretamente o nome do exercício de versões antigas no aviso ao personal. O valor de carga anterior é referência, não prescrição automática.
-
-**DECISÃO APROVADA — ANAMNESE CONFIGURÁVEL:** o personal define seu formulário inicial e o aluno responde ao iniciar o plano. **PENDENTE:** contrato versionado de perguntas e respostas, estados rascunho/enviado/revisado, perguntas obrigatórias e condicionais, limites de dados sensíveis, acesso estrito por profissional/aluno, consentimento, retenção, revisão humana e eventual encaminhamento ao nutricionista somente com permissão específica. O painel atual usa apenas atividade do treino e não substitui anamnese ou avaliação profissional.
-
-**PENDENTE — ACOMPANHAMENTO:** os indicadores atuais de sete dias são sinais simples; definir com profissionais quais metas e alertas fazem sentido por aluno, sem presumir frequência semanal. O atalho “fazer depois” reorganiza apenas a sessão aberta; após recarga o item permanece pendente, mas a posição temporária da fila não é persistida. Migration e frontend foram publicados no ambiente de teste em 2026-11-04. Validar uso e som em celular real antes do piloto e corrigir o gatilho automático GitHub → Cloudflare.
-
-**PENDENTE — ALERTA DE DESCANSO NO CELULAR:** confirmar volume do novo aviso original e vibração em Chrome Android/PWA, com a tela visível e em segundo plano. A reprodução de áudio e a vibração com tela bloqueada ou outro app aberto não são garantidas por esta implementação web; qualquer promessa de alerta confiável nessas condições exigirá outra solução técnica e validação em aparelhos reais.
-
-**PENDENTE — CAPA DE VÍDEO PRIVADO:** a visão do aluno usa a miniatura pública do YouTube como prévia leve. Vídeos próprios em MP4 não possuem capa dedicada; avaliar geração ou upload opcional de imagem pelo personal, com RLS, limites de tamanho, remoção e comportamento offline, antes de ampliar o contrato persistente de mídia.
+[Segurança](SECURITY.md) · [Como verificar](TESTING.md) · [Infraestrutura](INFRASTRUCTURE.md)

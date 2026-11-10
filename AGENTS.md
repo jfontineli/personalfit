@@ -1,53 +1,34 @@
-# Instruções para agentes — PersonalFit
+# PersonalFit — agente do monorepo
 
-## 1. Bootstrap do contexto
+## Bootstrap
 
-Antes de alterar arquivos, leia `README.md`, `docs/projeto/README.md`, `docs/projeto/CURRENT_STATE.md` e os ADRs pertinentes. Verifique a árvore, os arquivos existentes e o estado do Git. Se o código ainda não existir, não descreva documentação como implementação.
+1. Leia este arquivo e o [índice da memória](docs/projeto/README.md).
+2. Leia o [estado atual](docs/projeto/CURRENT_STATE.md) e o [README do produto](README.md).
+3. Consulte os documentos do módulo e os [ADRs pertinentes](docs/decisions/README.md). Em `apps/web/` e `supabase/`, aplique também o agente local.
+4. Confira raiz, branch, HEAD, `git status --short --branch`, arquivos não rastreados e diff relevante. Entenda e preserve alterações preexistentes.
 
-## 2. Hierarquia das fontes de verdade
+## Fontes de verdade
 
-Quando houver divergência, verifique nesta ordem, exatamente:
+Para constatar o estado, siga a ordem: código atual → migrations/configuração/contratos → testes → documentação persistente e ADRs → AGENTS.md → histórico Git relevante → conversa atual → inferência. A instrução recente do usuário define o escopo futuro. Registre decisões novas e relações com as anteriores. Use as etiquetas e os limites de evidência do índice da memória.
 
-1. Código atual.
-2. Migrations e configuração atuais.
-3. Testes.
-4. Documentação persistente em `docs/projeto/` e ADRs.
-5. Este `AGENTS.md`.
-6. Histórico Git.
-7. Conversa atual.
+## Invariantes
 
-Essa ordem serve para **constatar o estado existente**; uma instrução explícita e recente do usuário sobre o trabalho solicitado continua sendo a autoridade para mudanças futuras. Não altere uma decisão aprovada silenciosamente: registre a nova decisão e atualize os documentos afetados.
+O SaaS é multi-tenant e white-label, centrado no profissional. Valide identidade, perfil e vínculo ativos, tenant, papel e recurso no servidor. O tenant_id do cliente nunca concede acesso. Isole alunos, inclusive entre colegas do mesmo espaço. A capacidade nutricional exige atribuição individual. Mantenha service role fora do browser.
 
-## 3. Etiquetas de evidência
+Separe biblioteca, prescrição versionada e execução. Preserve snapshots, histórico e a versão da sessão, inclusive após inativação e reenvio offline. Isole dados locais por identidade, tenant e aluno. Diferencie gravação no aparelho de confirmação no servidor.
 
-Use `CONFIRMADO` somente para comportamento demonstrado por código, migration, configuração, teste ou observação verificável. Use `DECISÃO APROVADA` para escopo ou arquitetura autorizados pelo usuário. Use `HIPÓTESE` para proposta ainda não validada. Use `PENDENTE` para trabalho não feito. Use `NECESSITA VALIDAÇÃO HUMANA` para decisão de produto, negócio, exercício profissional ou responsabilidade legal que não cabe ao agente assumir.
+## Análise de impacto
 
-## 4. Preparação de mudanças
+Antes de implementar, avalie frontend, banco, migrations, RLS, RPCs, Storage, Auth, offline, IndexedDB, versões de treino e nutrição, auditoria, infraestrutura e compatibilidade com PWA instalada e operações antigas. Consulte [riscos abertos](docs/projeto/TECH_DEBT.md).
 
-Leia a documentação relevante antes de cada alteração. Analise o impacto em tenant, autorização, versões de treino, execução, sincronização, offline, API e migrações. Preserve alterações existentes e não sobrescreva trabalho alheio sem entender seu estado. Mantenha alterações proporcionais à fase autorizada.
+## Project knowledge maintenance
 
-## 5. Isolamento e segurança
+Ao encerrar cada tarefa, avalie mudanças reais em arquitetura, domínio, regras, banco/migration, API, RLS/autorização, segurança/Storage, offline/sincronização, treino, nutrição, infraestrutura e comportamento observável. Atualize o documento responsável na mesma tarefa e CURRENT_STATE quando mudar o estado real. Sem mudança de fato ou decisão, dispense edição documental. Use exemplos fictícios e evidência técnica mínima. Anexos locais e material de referência não são fontes de conteúdo distribuível.
 
-Toda leitura e escrita de dados privados valida: usuário autenticado → vínculo ativo → tenant → papel/permissão → recurso específico. `tenant_id` recebido do cliente nunca concede acesso. Um aluno só acessa seus próprios dados e vínculos. A interface não é a camada de autorização.
+## Definition of Done
 
-Use RLS em tabelas e Storage expostos pelo Supabase e complemente com validações de servidor para operações compostas ou privilegiadas. Teste negação entre Tenant A e Tenant B, entre alunos do mesmo tenant e para contas inativas. Negue por padrão. Não envie chaves privilegiadas, tokens administrativos, fotos, medidas ou logs sensíveis para o bundle público.
+Conforme o impacto, execute lint, Vitest, build, reset em banco descartável, pgTAP e Playwright. Revise migrations, RLS entre tenants e alunos, Storage, segurança, offline e compatibilidade. Confira diff, status, arquivos novos, links e documentação. Registre o que foi validado, em qual ambiente e o que ficou pendente.
 
-## 6. Contratos, migrations e histórico
+## Proibições
 
-Defina contratos estáveis e versionados para operações de sincronização e publicação. Qualquer mudança persistente deve ter migration revisável; não editar migrations já aplicadas em ambientes compartilhados. Separe prescrição de execução. Publicar cria versão imutável. Uma sessão mantém a versão com que começou, inclusive quando sincronizada depois de uma publicação nova. Nunca apague o histórico ao inativar aluno ou editar prescrição.
-
-## 7. Offline e sincronização
-
-Use IndexedDB para prescrições disponíveis offline, sessões em andamento e operações pendentes; `localStorage` fica restrito a preferências simples. Grave alteração local e operação pendente de forma atômica. Cada operação crítica tem ID estável, idempotência no servidor, retry apropriado, estado visível e tratamento explícito de conflito/erro. Não descarte pendências silenciosamente nem prometa sincronização quando somente o dispositivo confirmou a gravação. Cache Storage armazena recursos da PWA, respeitando privacidade e versão.
-
-## 8. Testes e revisão
-
-Escolha testes que verifiquem comportamento e riscos reais, em especial autorização, RLS, publicação, preservação do histórico, duplicidade e interrupção da sincronização. Antes de encerrar uma alteração, revise o diff e o estado do Git; confirme arquivos criados, conteúdo sensível acidental e documentação desatualizada. Não faça commit, push ou deploy sem autorização da tarefa atual.
-
-## 9. Manutenção da memória persistente
-
-Atualize `CURRENT_STATE.md` quando o estado real mudar. Atualize os documentos de domínio, API, banco, segurança e testes junto com os contratos correspondentes. Registre mudança arquitetural em novo ADR ou em ADR que ainda esteja proposto, preservando o histórico da decisão. Marque o que permanece pendente; não promova hipótese a fato sem evidência.
-
-## 10. Material de referência
-
-`referencia/` serve somente para análise funcional e de experiência. Não copie código, marca, textos, imagens, nomes, assets nem conteúdo proprietário para o produto. A pasta está ignorada pelo Git.
+Sem autorização explícita da tarefa: commit, push, deploy, alteração de produção ou secrets, reset remoto destrutivo, exclusão massiva, reescrita do histórico Git e alteração de migration histórica aplicada. Para evoluir o schema, use migration nova. Nunca exponha service role, tokens, dados clínicos ou backups no cliente ou na documentação. Não copie código, marca, textos ou mídias de `referencia/`.
