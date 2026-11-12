@@ -11,4 +11,6 @@ A entrada seleciona diagnóstico ou IdentityApp conforme a rota. IdentityApp car
 3. IndexedDB tem bases separadas para diagnóstico/Auth, treino/contexto e alimentação. Sessão ou refeição e operação pendente são gravadas atomicamente. As filas de domínio segregam por conta e tenant; cada operação referencia aluno e versão.
 4. Em conexão, a RPC valida o recurso e reconhece a operação ou retorna erro. As filas preservam a pendência. Backoff persistente e reconciliação entre aparelhos continuam em aberto.
 
+**DECISÃO APROVADA · trabalho local validado** — A experiência aberta na versão atualmente atribuída resolve nome, instruções gerais e vídeo pela biblioteca atual por RPC autorizada. O snapshot serve de fallback offline e é a fonte de sessões terminais ou de versões anteriores. A sessão continua na versão inicial, inclusive após republicação e retomada em instalação limpa. [ADR 0013](../decisions/0013-live-exercise-media.md) · [ADR 0021](../decisions/0021-live-exercise-library-content.md)
+
 [Contratos](API.md) · [Estrutura do banco](DATABASE.md) · [Frontend](../../apps/web/README.md)

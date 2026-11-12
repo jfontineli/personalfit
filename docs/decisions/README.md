@@ -24,6 +24,7 @@ Cada ADR registra contexto, decisão, alternativas e consequências. Uma decisã
 | [0018](0018-rest-timer-and-exercise-swap-ux.md) | Descanso visível e troca orientada | DECISÃO APROVADA |
 | [0019](0019-simple-preparation-and-cardio.md) | Preparação simples e cardio prescrito | DECISÃO APROVADA |
 | [0020](0020-guides-separate-from-workout.md) | Orientações separadas da execução do treino | DECISÃO APROVADA |
+| [0021](0021-live-exercise-library-content.md) | Nome, instruções e mídia atuais da biblioteca na experiência ativa | DECISÃO APROVADA |
 
 Os ADRs 0001 a 0008 foram registrados em 2026-09-29; os ADRs 0009 a 0011, em 2026-09-30; os ADRs 0012 a 0014, em 2026-11-02; os ADRs 0015 a 0017, em 2026-11-03. A aprovação da arquitetura não significa que a implementação já exista.
 
@@ -32,5 +33,6 @@ Os ADRs 0001 a 0008 foram registrados em 2026-09-29; os ADRs 0009 a 0011, em 202
 - 0009 complementa 0007 e prioriza a biblioteca do espaço e a autoria do profissional.
 - 0016 complementa 0015 com dupla atuação mediante atribuição individual.
 - 0018 restringe a interação de 0017 quando não há alternativa aprovada e preserva o contrato histórico de ocorrências.
+- 0021 amplia 0013 para nome e instruções atuais, mantendo o versionamento de 0005. A implementação foi validada localmente em banco descartável e permanece sem publicação.
 
 Para saber o que chegou a cada ambiente, consulte [estado atual](../projeto/CURRENT_STATE.md) e [infraestrutura](../projeto/INFRASTRUCTURE.md).

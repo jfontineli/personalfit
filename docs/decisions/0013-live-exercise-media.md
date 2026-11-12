@@ -18,5 +18,7 @@ Este ADR ajusta somente a regra de **exibição da mídia atual** do [ADR 0009](
 ## Consequências
 
 - Uma atualização de vídeo na biblioteca alcança os alunos que têm o exercício prescrito, sem uma publicação por aluno.
-- O histórico de prescrições ainda contém o endereço da mídia na época; uma futura tela de histórico deverá distinguir mídia atual de mídia histórica e sua política de retenção.
+- O histórico de prescrições contém o endereço da mídia na época. O ADR 0021 define que sessões terminais ou de versão anterior usam essa mídia histórica e que a versão atual aberta usa a mídia ao vivo.
 - A consulta de mídia não concede leitura da biblioteca completa ao aluno nem acesso a exercícios de outros alunos ou tenants.
+
+O [ADR 0021](0021-live-exercise-library-content.md) amplia o conteúdo atual para incluir nome e instruções gerais na experiência ativa. Os campos individuais e a versão da sessão continuam preservados.

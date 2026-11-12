@@ -48,7 +48,7 @@ test('papéis, tenant, cadastro, convite e acesso negado por ID', async ({ page 
     await page.getByRole('button', { name: 'Salvar aluno' }).click()
     await expect(page.getByRole('heading', { name: 'Aluno E2E' })).toBeVisible()
     studentId = new URL(page.url()).pathname.split('/')[3]
-    await expect(page.getByText('Conta: pendente')).toBeVisible()
+    await expect(page.locator('.student-heading').getByText('Conta pendente')).toBeVisible()
     await page.getByLabel('Objetivo').fill('Objetivo de teste')
     await page.getByRole('button', { name: 'Salvar aluno' }).click()
     await expect(page.getByText('Aluno atualizado')).toBeVisible()
@@ -58,9 +58,9 @@ test('papéis, tenant, cadastro, convite e acesso negado por ID', async ({ page 
     const link = invitation.match(/http:\/\/[^\s]+\/ativar#token=[0-9a-f]{64}/)?.[0]
     expect(link).toBeTruthy()
     await page.getByRole('button', { name: 'Inativar aluno' }).click()
-    await expect(page.getByText('Status: Inativo')).toBeVisible()
+    await expect(page.locator('.student-heading').getByText('Inativo', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Reativar aluno' }).click()
-    await expect(page.getByText('Status: Ativo')).toBeVisible()
+    await expect(page.locator('.student-heading .status-badge').getByText('Ativo', { exact: true })).toBeVisible()
     await page.getByRole('link', { name: 'Marca', exact: true }).click()
     await page.getByLabel('Nome exibido aos alunos').fill('Marca A E2E')
     await page.getByRole('button', { name: 'Salvar marca' }).click()

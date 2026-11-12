@@ -14,4 +14,6 @@
 | Aluno na alimentação | nutrition_student_plan retorna a última versão com projeção autorizada. nutrition_log_meal valida aluno, versão, refeição, data e operation ID; nutrition_meal_day consulta o dia. A janela aceita registros de até 31 dias anteriores. |
 | Diagnóstico | record_technical_operation confirma recibo técnico por usuário/operação. O diagnóstico usa a primeira membership ativa no envio. |
 
+**DECISÃO APROVADA · trabalho local validado** — `student_exercise_content(p_student_id, p_version_id)` retorna `exercise_id`, `name`, `instructions` e `video_url` dos itens principais e alternativas da versão atualmente atribuída ao aluno autenticado. A experiência aberta dessa versão usa o conteúdo atual; versão anterior, sessão terminal e indisponibilidade da RPC usam o snapshot. [Migration local](../../supabase/migrations/20261109000000_live_exercise_content.sql)
+
 **PENDENTE** — Política de retry/backoff, recuperação de conflito, prazo de retenção dos recibos e distinção de erro transitório versus perda de autorização em todos os consumidores. Uma resposta vazia pode refletir RLS. Confira a [matriz](AUTHORIZATION.md) antes de alterar fallback de leitura.

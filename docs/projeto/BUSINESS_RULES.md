@@ -5,7 +5,8 @@
 ## Treino
 
 - O profissional cria a prescrição individual. Salvar rascunho mantém a edição privada. Publicar cria nova versão e atribuição. Rascunho marcado para revisão exige liberação profissional antes da publicação.
-- A sessão aceita apenas itens do dia prescrito e troca por alternativa aprovada antes da primeira série do item. A troca vale para a sessão. Pausa permite retomar.
+- **DECISÃO APROVADA · trabalho local validado** — Vídeo, nome e instrução geral são compartilhados pela biblioteca. A versão atual atribuída reflete correções online sem republicação individual. Sessões terminais ou de versão anterior usam o snapshot completo. Séries, descanso, ordem, estilo de registro, metas, alternativas e orientação adicional mudam mediante nova publicação. [ADR 0013](../decisions/0013-live-exercise-media.md) · [ADR 0021](../decisions/0021-live-exercise-library-content.md)
+- A sessão aceita apenas itens do dia prescrito e troca por alternativa aprovada antes da primeira série do item. A troca vale para a sessão. Pausa permite retomar. A árvore local privilegia execução linear e remove o adiamento isolado.
 - Séries registram repetições ou duração conforme a prescrição; carga e esforço são opcionais quando aplicáveis. Preparação simples admite confirmação. Cardio pode prescrever etapas; o aluno registra a duração total. Guias complementares só aparecem quando publicados.
 - Encerramento completo e parcial têm estados distintos. A progressão semanal considera dias encerrados pelos IDs estáveis, inclusive ao mudar a versão, e respeita a duração prescrita quando existe. A referência de carga anterior não prescreve progressão automática.
 - Gravar no aparelho permite continuar offline. O servidor valida a operação e confirma separadamente. Vídeo exige conexão. Indicadores de sete dias orientam revisão pelo profissional.

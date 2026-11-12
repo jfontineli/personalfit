@@ -34,7 +34,7 @@ Na área do personal, **Alunos** reúne busca, filtros e cadastro; **Marca** per
 
 **Exercícios** permite cadastrar instruções e vídeo próprio MP4 de até 25 MB, consultado online. No detalhe do aluno, o personal registra o plano de atendimento, monta o rascunho por dias e publica uma versão. O aluno abre `/aluno/inicio`, registra séries mesmo sem conexão após carregar o treino uma vez, e vê quando o servidor confirma os lançamentos. Não há botão de download offline.
 
-O vídeo de um exercício pode ser MP4 privado ou link do YouTube. Ao atualizá-lo na biblioteca, os alunos que têm esse exercício prescrito veem a mídia atual quando abrem o treino online, sem nova publicação individual. Mudanças na prescrição de um aluno continuam exigindo publicação para ele.
+**Trabalho local validado (ADR 0021).** O vídeo de um exercício pode ser MP4 privado ou link do YouTube. Nome, instruções e vídeo são compartilhados pela biblioteca: ao atualizá-los, os alunos que têm esse exercício na versão atual atribuída veem o conteúdo atual quando abrem o treino online, sem nova publicação individual. Séries, descanso, ordem, alternativas e orientação adicional de um aluno continuam exigindo publicação. Sessões de versões anteriores, concluídas ou parciais apresentam o snapshot histórico dos três campos compartilhados.
 
 Na aba **Alimentação** do aluno, o personal pode convidar um nutricionista ou, se também exercer essa função, escolher **Sou nutricionista**, informar seu CRN e assumir o vínculo individual. Ele usa a mesma conta e edita o plano alimentar desse aluno na própria aba. O CRN informado ainda depende de conferência humana antes de atendimento real.
 

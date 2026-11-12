@@ -250,8 +250,6 @@ code { overflow-wrap: anywhere; }
 .student-exercise-card { margin: 10px 0; border: 1px solid #dce5d8; border-radius: 12px; background: #fff; }
 .student-exercise-card { scroll-margin-top: 18px; }
 .student-exercise-card.is-complete { border-color: #a9d0b4; background: #f1f8f2; }
-.student-exercise-card.is-deferred { border-style: dashed; }
-.student-defer-button { margin: 10px 0; }
 .student-finish-summary { display: grid; gap: 4px; margin: 16px 0; padding: 16px; border: 1px solid #a9d0b4; border-radius: 12px; background: #f1f8f2; }
 .student-finish-summary small { color: #49655f; }
 .student-exercise-card.is-complete .student-exercise-number { background: #d9ecdd; color: #13512e; }

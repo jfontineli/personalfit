@@ -80,7 +80,7 @@ export function ExerciseLibrary({ tenantId }: { tenantId: string }) {
     {showCreate && <form onSubmit={event => void submit(event)} className="workout-form exercise-create-form">
       <label>Nome do exercício<input value={name} onChange={event => setName(event.target.value)} required maxLength={160} placeholder="Ex.: Agachamento livre" /></label>
       <label>Grupo principal<select value={muscleGroup} onChange={event => setMuscleGroup(event.target.value as MuscleGroup)}>{exerciseGroups.map(group => <option key={group.id} value={group.id}>{group.label}</option>)}</select></label>
-      <label>Suas instruções<textarea value={instructions} onChange={event => setInstructions(event.target.value)} maxLength={4000} placeholder="Como você orienta a execução" /></label>
+      <label>Instruções gerais para o aluno <span className="field-hint">Explique posição, movimento e cuidados de execução</span><textarea value={instructions} onChange={event => setInstructions(event.target.value)} maxLength={4000} placeholder="Ex.: posição inicial, como executar e o que evitar" /></label>
       <VideoFields id="new-exercise-video" mode={videoMode} setMode={setVideoMode} youtubeUrl={youtubeUrl} setYoutubeUrl={setYoutubeUrl} file={videoFile} setFile={setVideoFile} />
       <button disabled={saving}>{saving ? 'Salvando…' : 'Adicionar exercício'}</button>
     </form>}
@@ -111,9 +111,7 @@ function ExerciseCard({ exercise, onSaved }: { exercise: Exercise; onSaved: (upd
         : await updateExercise(exercise, name, instructions, muscleGroup,
           videoMode === 'YOUTUBE' ? normalizeYoutubeUrl(youtubeUrl) : videoMode === 'KEEP' ? exercise.video_url : null)
       onSaved(updated); setEditing(false)
-      setNotice(updated.video_url !== exercise.video_url
-        ? 'Vídeo salvo. Alunos com este exercício verão a mídia atual ao abrir o treino com internet, sem nova publicação.'
-        : 'Exercício atualizado.')
+      setNotice('Exercício atualizado para todos os alunos que já o têm prescrito. Não é necessário republicar; versões e sessões históricas permanecem preservadas.')
     }
     catch (failure) { setError(messageOf(failure)) }
     finally { setSaving(false) }
@@ -122,7 +120,7 @@ function ExerciseCard({ exercise, onSaved }: { exercise: Exercise; onSaved: (upd
     <button type="button" className="secondary-button" onClick={() => { if (!editing) { setName(exercise.name); setInstructions(exercise.instructions); setMuscleGroup(exercise.muscle_group); setVideoMode(exercise.video_url ? 'KEEP' : 'NONE'); setYoutubeUrl(''); setVideoFile(null); setError('') } setEditing(value => !value) }} aria-expanded={editing}>{editing ? 'Fechar' : 'Editar exercício'}</button></div>
     {editing && <form onSubmit={event => void save(event)}><label>Nome<input value={name} onChange={event => setName(event.target.value)} required maxLength={160} /></label>
       <label>Grupo principal<select value={muscleGroup} onChange={event => setMuscleGroup(event.target.value as MuscleGroup)}>{exerciseGroups.map(group => <option key={group.id} value={group.id}>{group.label}</option>)}</select></label>
-      <label>Instruções<textarea value={instructions} onChange={event => setInstructions(event.target.value)} maxLength={4000} /></label>
+      <label>Instruções gerais para o aluno <span className="field-hint">A alteração vale para todos os alunos que já têm este exercício, sem republicar</span><textarea value={instructions} onChange={event => setInstructions(event.target.value)} maxLength={4000} placeholder="Explique posição, movimento e cuidados de execução" /></label>
       <VideoFields id={`exercise-video-${exercise.id}`} mode={videoMode} setMode={setVideoMode} youtubeUrl={youtubeUrl} setYoutubeUrl={setYoutubeUrl} file={videoFile} setFile={setVideoFile} currentUrl={exercise.video_url} />
       <button disabled={saving}>{saving ? 'Salvando…' : 'Salvar exercício'}</button></form>}
     {error && <p role="alert" className="feedback error">{error}</p>}
@@ -291,7 +289,7 @@ export function WorkoutEditor({ tenantId, studentId, studentName, active }: { te
   }
   return <section className="workout-editor" aria-labelledby="workout-editor-title"><div className="section-heading"><div><span className="eyebrow">Prescrição do personal</span><h3 id="workout-editor-title">Treino prescrito</h3><p>{current ? `Versão ${current.version_number} publicada em ${new Date(current.published_at).toLocaleDateString('pt-BR')}.` : 'Nenhum treino publicado para este aluno.'}</p></div></div>
     {error && <p role="alert" className="feedback error">{error}</p>}{message && <p role="status" className="feedback success">{message}</p>}
-    <p className="field-hint">Vídeos da biblioteca aparecem para o aluno quando ele abre o treino com internet. Mudanças nesta prescrição exigem publicação para este aluno.</p>
+    <p className="field-hint">Nome, instruções e vídeo vêm da sua biblioteca e atualizam para todos os alunos que usam o exercício. Séries, descanso, ordem, alternativas e orientação individual exigem publicação para este aluno.</p>
     {!active && <p className="feedback error">Reative o aluno antes de publicar um treino.</p>}
     {draft.reviewRequired && <div className="confirm-box"><p role="alert">Este treino aguarda revisão profissional. Confira os dias, as séries, os descansos e as orientações antes de publicar para o aluno.</p><button type="button" className="secondary-button" onClick={() => setDraft(previous => ({ ...previous, reviewRequired: false }))}>Revisei o treino e quero liberar a publicação</button></div>}
     <label>Nome do treino<input value={title} onChange={event => { setTitle(event.target.value); setConfirmPublish(false) }} maxLength={160} required /></label>
@@ -332,7 +330,7 @@ export function WorkoutEditor({ tenantId, studentId, studentName, active }: { te
             </>}
             {!preparation && !cardio && <><label>Carga de referência (kg) <span className="field-hint">Opcional; não preenche o registro do aluno</span><input type="number" min="0" max="9999" step="0.01" value={item.loadHintKg ?? ''} onChange={event => updateDay(activeDay.id, value => ({ ...value, items: value.items.map(current => current.id === item.id ? { ...current, loadHintKg: event.target.value === '' ? undefined : Number(event.target.value) } : current) }))} /></label><label>Repetições que sobrariam (alvo) <span className="field-hint">Opcional; ex.: 2 a 3</span><input maxLength={30} value={item.rirHint ?? ''} onChange={event => updateDay(activeDay.id, value => ({ ...value, items: value.items.map(current => current.id === item.id ? { ...current, rirHint: event.target.value } : current) }))} /></label></>}
             {!cardio && !preparation && <label>Tipo e alvo de cada série <span className="field-hint">Uma linha por série</span><textarea value={(item.setLabels ?? []).join('\n')} onChange={event => updateDay(activeDay.id, value => ({ ...value, items: value.items.map(current => current.id === item.id ? { ...current, setLabels: event.target.value ? event.target.value.split('\n') : undefined } : current) }))} rows={Math.min(item.sets, 5)} placeholder={'Aquecimento · 10 repetições\nVálida 1 · 8 a 12 repetições'} /></label>}
-            <label>Orientação específica para este aluno<textarea value={item.notes ?? ''} onChange={event => updateDay(activeDay.id, value => ({ ...value, items: value.items.map(current => current.id === item.id ? { ...current, notes: event.target.value } : current) }))} maxLength={1000} rows={2} /></label>
+            <label>Orientação adicional para este aluno <span className="field-hint">Opcional; complemente a instrução geral sem repetir séries ou descanso</span><textarea value={item.notes ?? ''} onChange={event => updateDay(activeDay.id, value => ({ ...value, items: value.items.map(current => current.id === item.id ? { ...current, notes: event.target.value } : current) }))} maxLength={1000} rows={2} placeholder="Ex.: ajuste de posição ou cuidado individual combinado com este aluno" /></label>
             <div className="workout-order-controls"><span>Ordem do exercício: {index + 1} de {activeDay.items.length}</span><button type="button" className="secondary-button" disabled={index === 0} onClick={() => moveExercise(activeDay.id, index, -1)}>Subir exercício</button><button type="button" className="secondary-button" disabled={index === activeDay.items.length - 1} onClick={() => moveExercise(activeDay.id, index, 1)}>Descer exercício</button></div>
             <button type="button" className="text-button danger-button" onClick={() => { updateDay(activeDay.id, value => ({ ...value, items: value.items.filter(current => current.id !== item.id) })); setExpandedItemId(null) }}>Remover exercício</button>
           </div>}</div> })}</div>

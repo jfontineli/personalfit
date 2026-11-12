@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { adoptRemoteWorkoutSession, cacheWorkout, confirmWorkoutOperation, flagWorkoutOperation, getCachedWorkout,
   listLocalSessions, pendingWorkoutOperations, saveLocalWorkoutSession } from '../offline/workoutStore'
-import { getCurrentWorkout, getStudentExerciseVideos, getWorkoutVersion, listWorkoutSessions, listWorkoutSessionsForWeek, syncWorkoutSession, youtubeThumbnailUrl,
-  type WorkoutEntry, type WorkoutSession, type WorkoutVersion } from '../services/workouts'
+import { getCurrentWorkout, getStudentExerciseContent, getWorkoutVersion, listWorkoutSessions, listWorkoutSessionsForWeek, syncWorkoutSession, youtubeThumbnailUrl,
+  type StudentExerciseContent, type WorkoutEntry, type WorkoutSession, type WorkoutVersion } from '../services/workouts'
 import { InstructionVideo } from './Workouts'
 import { workoutGuideSections } from './workoutGuides'
 import { availableTrainingWeek, shiftWorkoutWeek } from './workoutCalendar'
@@ -105,6 +105,7 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const [current, setCurrent] = useState<WorkoutVersion | null>(null)
   const [weekStart, setWeekStart] = useState(() => monday(new Date()))
   const [dayId, setDayId] = useState('')
+  const [historyId, setHistoryId] = useState('')
   const [localSessions, setLocalSessions] = useState<LocalSession[]>([])
   const [remoteSessions, setRemoteSessions] = useState<WorkoutSession[]>([])
   const [historySessions, setHistorySessions] = useState<WorkoutSession[]>([])
@@ -116,14 +117,13 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const [confirmPartial, setConfirmPartial] = useState(false)
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null)
   const [editingEntryKey, setEditingEntryKey] = useState('')
-  const [liveVideos, setLiveVideos] = useState<{ versionId: string; urls: Record<string, string | null> } | null>(null)
+  const [liveExercises, setLiveExercises] = useState<{ versionId: string; items: Record<string, StudentExerciseContent> } | null>(null)
   const [now, setNow] = useState(0)
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('personalfit-rest-sound') !== 'off')
   const [vibrationEnabled, setVibrationEnabled] = useState(() => localStorage.getItem('personalfit-rest-vibration') !== 'off')
   const [restNotified, setRestNotified] = useState('')
   const [audio] = useState(() => new RestAudio())
   const [swapOpenId, setSwapOpenId] = useState('')
-  const [deferred, setDeferred] = useState<{ sessionId: string; itemIds: string[] }>({ sessionId: '', itemIds: [] })
   const [view, setView] = useState<'TREINO' | 'ORIENTACOES'>('TREINO')
   const initializedVersionId = useRef('')
 
@@ -150,8 +150,13 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
     try {
       const rows = await listWorkoutSessionsForWeek(tenantId, studentId, weekStart)
       setRemoteSessions(rows)
-      for (const row of rows.filter(item => item.status === 'IN_PROGRESS' || item.status === 'PAUSED')) {
-        try { await adoptRemoteWorkoutSession(userId, tenantId, studentId, await getWorkoutVersion(row.version_id), row) } catch { /* Keep server status visible; no local data is replaced on error. */ }
+      const versions = new Map<string, WorkoutVersion>()
+      for (const row of rows.filter(item => item.day_id && item.week_start)) {
+        try {
+          const version = versions.get(row.version_id) ?? await getWorkoutVersion(row.version_id)
+          versions.set(version.id, version)
+          await adoptRemoteWorkoutSession(userId, tenantId, studentId, version, row)
+        } catch { /* Keep server status visible; no local data is replaced on error. */ }
       }
       setLocalSessions(await listLocalSessions(userId, tenantId, studentId))
       setHistorySessions(await listWorkoutSessions(tenantId, studentId))
@@ -160,7 +165,7 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
 
   useEffect(() => {
     let mounted = true
-    void (async () => {
+    const refresh = async () => {
       try {
         const cached = (await getCachedWorkout(userId, tenantId, studentId))?.version ?? null
         if (mounted) setCurrent(cached)
@@ -168,15 +173,18 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
           try {
             const assigned = await getCurrentWorkout(tenantId, studentId)
             if (assigned) await cacheWorkout(userId, tenantId, studentId, assigned.version)
-            if (mounted) setCurrent(assigned?.version ?? cached)
+            if (mounted) setCurrent(assigned?.version ?? null)
           } catch (failure) { if (!cached && mounted) setError(messageOf(failure)) }
         }
         if (mounted) { await refreshQueue(); await synchronize() }
       } catch (failure) { if (mounted) setError(messageOf(failure)) }
-    })()
-    const online = () => { void synchronize() }
+    }
+    void refresh()
+    const online = () => { void refresh() }
+    const visible = () => { if (navigator.onLine && document.visibilityState === 'visible') online() }
+    document.addEventListener('visibilitychange', visible)
     window.addEventListener('online', online)
-    return () => { mounted = false; window.removeEventListener('online', online) }
+    return () => { mounted = false; document.removeEventListener('visibilitychange', visible); window.removeEventListener('online', online) }
   }, [tenantId, studentId, userId, refreshQueue, synchronize])
   useEffect(() => {
     let mounted = true
@@ -224,35 +232,51 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const selectedPrevious = localSessions.find(row => row.day_id === dayId && row.week_start === weekStart && ['IN_PROGRESS','PAUSED'].includes(row.status))
   const openSession = localSessions.find(row => row.week_start === weekStart && ['IN_PROGRESS','PAUSED'].includes(row.status))
     ?? remoteSessions.find(row => row.week_start === weekStart && ['IN_PROGRESS','PAUSED'].includes(row.status))
-  const effectiveDayId = current?.snapshot.days.some(day => day.id === dayId) || selectedPrevious ? dayId : openSession?.day_id ?? nextDayId ?? current?.snapshot.days[0]?.id ?? ''
-  const selectedLocal = localSessions.filter(row => row.day_id === effectiveDayId && row.week_start === weekStart)
+  const historical = [...localSessions, ...historySessions].filter((row, index, rows) =>
+    row.week_start && row.day_id && row.version_id !== current?.id && rows.findIndex(other => other.id === row.id) === index)
+  const selectedHistory = historical.find(row => row.id === historyId && row.week_start === weekStart)
+  const effectiveDayId = selectedHistory?.day_id ?? (current?.snapshot.days.some(day => day.id === dayId) || selectedPrevious ? dayId : openSession?.day_id ?? nextDayId ?? current?.snapshot.days[0]?.id ?? '')
+  const selectedLocal = localSessions.filter(row => row.day_id === effectiveDayId && row.week_start === weekStart && (!selectedHistory || row.id === historyId))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
-  const selectedRemote = remoteSessions.find(row => row.day_id === effectiveDayId && row.week_start === weekStart)
+  const selectedRemote = [...remoteSessions, ...historySessions].find(row => row.day_id === effectiveDayId && row.week_start === weekStart && (!selectedHistory || row.id === historyId))
   const active = selectedLocal
-  const displayed = active && ['IN_PROGRESS','PAUSED'].includes(active.status) ? active.version : current
-  const displayedVersionId = displayed?.id
+  const displayed = active?.version ?? (selectedRemote && selectedRemote.version_id !== current?.id ? null : current)
+  const sessionStatus = active?.status ?? selectedRemote?.status
+  const displayedVersionId = displayed?.id === current?.id && sessionStatus !== 'COMPLETED' && sessionStatus !== 'PARTIAL' ? displayed?.id : undefined
+  useEffect(() => {
+    if (!selectedHistory || active || !('tenant_id' in selectedHistory) || !navigator.onLine) return
+    let mounted = true
+    void getWorkoutVersion(selectedHistory.version_id)
+      .then(version => adoptRemoteWorkoutSession(userId, tenantId, studentId, version, selectedHistory))
+      .then(() => listLocalSessions(userId, tenantId, studentId))
+      .then(rows => { if (mounted) setLocalSessions(rows) })
+      .catch(failure => { if (mounted) setError(messageOf(failure)) })
+    return () => { mounted = false }
+  }, [selectedHistory, active, userId, tenantId, studentId])
   useEffect(() => {
     if (!displayedVersionId) return
     let mounted = true
+    let sequence = 0
     const versionId = displayedVersionId
     const refresh = () => {
       if (!navigator.onLine) return
-      void getStudentExerciseVideos(studentId, versionId)
-        .then(urls => { if (mounted) setLiveVideos({ versionId, urls }) })
-        .catch(() => { /* The published snapshot remains available if media refresh fails. */ })
+      const request = ++sequence
+      void getStudentExerciseContent(studentId, versionId)
+        .then(items => { if (mounted && sequence === request && navigator.onLine) setLiveExercises({ versionId, items }) })
+        .catch(() => { if (mounted && sequence === request) setLiveExercises(null) })
     }
+    const offline = () => { sequence++; setLiveExercises(null) }
+    window.addEventListener('offline', offline)
     refresh()
     const visible = () => { if (document.visibilityState === 'visible') refresh() }
     window.addEventListener('online', refresh)
     document.addEventListener('visibilitychange', visible)
-    return () => { mounted = false; window.removeEventListener('online', refresh); document.removeEventListener('visibilitychange', visible) }
+    return () => { mounted = false; window.removeEventListener('offline', offline); window.removeEventListener('online', refresh); document.removeEventListener('visibilitychange', visible) }
   }, [studentId, displayedVersionId])
   const day = displayed?.snapshot.days.find(item => item.id === effectiveDayId)
   const values = { ...entryValues(active), ...edits }
-  const deferredIds = deferred.sessionId === active?.id ? deferred.itemIds : []
   const firstPendingItemId = active && ['IN_PROGRESS','PAUSED'].includes(active.status) && day && day.id === active.day_id
-    ? (day.items.find(item => !deferredIds.includes(item.id) && active.entries.filter(entry => entry.itemId === item.id).length < item.sets)
-      ?? day.items.find(item => active.entries.filter(entry => entry.itemId === item.id).length < item.sets))?.id : undefined
+    ? day.items.find(item => active.entries.filter(entry => entry.itemId === item.id).length < item.sets)?.id : undefined
   const completed = (id: string) => localSessions.some(row => row.day_id === id && row.week_start === weekStart && row.status === 'COMPLETED')
     || remoteSessions.some(row => row.day_id === id && row.week_start === weekStart && row.status === 'COMPLETED')
   const partial = (id: string) => localSessions.some(row => row.day_id === id && row.week_start === weekStart && row.status === 'PARTIAL')
@@ -275,8 +299,8 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const weekNumber = cycleStart ? Math.floor((new Date(`${weekStart}T12:00:00`).getTime() - new Date(`${cycleStart}T12:00:00`).getTime()) / 604800000) + 1 : null
   const isActiveWeek = weekStart === activeTrainingWeek
   const canStart = isActiveWeek && (!cycleStart || new Date(`${cycleStart}T00:00:00`) <= new Date())
-  const done = active?.status === 'COMPLETED' || selectedRemote?.status === 'COMPLETED'
-  const partiallyDone = active?.status === 'PARTIAL' || selectedRemote?.status === 'PARTIAL'
+  const done = sessionStatus === 'COMPLETED'
+  const partiallyDone = sessionStatus === 'PARTIAL'
   const remoteOnly = !active && (selectedRemote?.status === 'IN_PROGRESS' || selectedRemote?.status === 'PAUSED')
   const elapsedSeconds = (active?.elapsed_seconds ?? 0) + (active?.status === 'IN_PROGRESS' && active.runningSince ? Math.max(0, Math.floor((now - Date.parse(active.runningSince)) / 1000)) : 0)
   const remainingRest = active?.status === 'IN_PROGRESS' && active.restEndsAt ? Math.max(0, Math.ceil((Date.parse(active.restEndsAt) - now) / 1000)) : 0
@@ -341,11 +365,9 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   }
   function advanceAfterItem(itemId: string, entries: WorkoutEntry[]) {
     if (!active || !day) return
-    setDeferred(previous => previous.sessionId === active.id ? { ...previous, itemIds: previous.itemIds.filter(id => id !== itemId) } : previous)
     const remaining = day.items.filter(row => entries.filter(entry => entry.itemId === row.id).length < row.sets)
     const index = day.items.findIndex(row => row.id === itemId)
-    const next = day.items.slice(index + 1).find(row => remaining.includes(row) && !deferredIds.includes(row.id))
-      ?? remaining.find(row => !deferredIds.includes(row.id)) ?? remaining[0]
+    const next = day.items.slice(index + 1).find(row => remaining.includes(row)) ?? remaining[0]
     setExpandedExerciseId(next?.id ?? '')
     window.requestAnimationFrame(() => {
       const target = document.getElementById(next ? `exercise-${next.id}` : 'student-finish')
@@ -361,15 +383,6 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
       .filter(setNumber => !active.entries.some(entry => entry.itemId === itemId && entry.setNumber === setNumber))
       .map(setNumber => ({ itemId, setNumber, completed: true as const }))]
     if (await persist(entries, 'IN_PROGRESS', active.id, undefined, null)) advanceAfterItem(itemId, entries)
-  }
-  function deferExercise(itemId: string) {
-    if (!active || !day) return
-    const skipped = [...deferredIds.filter(id => id !== itemId), itemId]
-    setDeferred({ sessionId: active.id, itemIds: skipped })
-    const next = day.items.find(row => row.id !== itemId && !skipped.includes(row.id) && active.entries.filter(entry => entry.itemId === row.id).length < row.sets)
-      ?? day.items.find(row => row.id !== itemId && active.entries.filter(entry => entry.itemId === row.id).length < row.sets)
-    setExpandedExerciseId(next?.id ?? '')
-    if (next) window.requestAnimationFrame(() => document.getElementById(`exercise-${next.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
   async function swapExercise(itemId: string, exerciseId: string) {
     if (!active || active.status !== 'IN_PROGRESS' || active.entries.some(entry => entry.itemId === itemId)) return
@@ -392,7 +405,14 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
   const publishedGuides = displayed ? workoutGuideSections.filter(section => Boolean(displayed.snapshot.guides?.[section.key]?.trim())) : []
   const hasGuides = Boolean(displayed?.snapshot.guidance?.trim() || publishedGuides.length)
   return <section className={`workout-player${active?.status === 'IN_PROGRESS' || active?.status === 'PAUSED' ? ' has-session-dock' : ''}${showRest ? ' has-rest-clock' : ''}`}><h3>Seu treino</h3>{error && <p role="alert" className="feedback error">{error}</p>}
-    {!displayed ? <p>{navigator.onLine ? 'Seu personal ainda não publicou um treino.' : 'Abra seu treino uma vez com internet para consultá-lo neste aparelho.'}</p> : <>
+    {historical.length > 0 && <label>Sessões de versões anteriores<select value={selectedHistory?.id ?? ''} onChange={event => {
+      const row = historical.find(item => item.id === event.target.value)
+      setHistoryId(row?.id ?? ''); setDayId(row?.day_id ?? ''); setEdits({}); setExpandedExerciseId(null)
+      if (row?.week_start) setWeekStart(row.week_start)
+    }}><option value="">Calendário do treino</option>{historical.map(row => <option key={row.id} value={row.id}>
+      {new Date(row.client_started_at ?? ('started_at' in row ? row.started_at : row.updatedAt)).toLocaleString('pt-BR')} · {row.status === 'COMPLETED' ? 'Concluída' : row.status === 'PARTIAL' ? 'Parcial' : row.status === 'PAUSED' ? 'Pausada' : 'Em andamento'}
+    </option>)}</select></label>}
+    {!displayed ? <p>{selectedRemote ? 'A versão de início desta sessão precisa ser carregada com internet.' : navigator.onLine ? 'Seu personal ainda não publicou um treino.' : 'Abra seu treino uma vez com internet para consultá-lo neste aparelho.'}</p> : <>
       <div className="student-workout-heading"><div><strong>{displayed.snapshot.title}</strong><small>Versão {displayed.version_number} · {displayed.snapshot.days.length} dias</small></div></div>
       {hasGuides && <nav className="student-workout-sections" aria-label="Seções do treino"><button type="button" aria-current={view === 'TREINO' ? 'page' : undefined} onClick={() => setView('TREINO')}>Treino</button><button type="button" aria-current={view === 'ORIENTACOES' ? 'page' : undefined} onClick={() => setView('ORIENTACOES')}>Orientações</button></nav>}
       {view === 'ORIENTACOES' && hasGuides ? <div className="student-guide-panel"><p>Conteúdos publicados pelo seu personal para este treino.</p>{active?.status === 'IN_PROGRESS' && <p className="field-hint">O tempo do treino continua contando enquanto você consulta as orientações.</p>}
@@ -400,7 +420,7 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
         {publishedGuides.map(section => <details key={section.key}><summary>{section.title}</summary><p className="workout-guidance">{displayed.snapshot.guides?.[section.key]}</p></details>)}
       </div> : <>
       {active && (active.status === 'COMPLETED' || active.status === 'PARTIAL') && <div className="student-session-clock" role="timer"><span>Tempo total do treino</span><strong>{clock(elapsedSeconds)}</strong></div>}
-      {previousInProgress && !selectedPrevious && <div className="feedback"><p>Há um treino iniciado em uma versão anterior.</p><button type="button" className="secondary-button" onClick={() => { setWeekStart(previousInProgress.week_start!); setDayId(previousInProgress.day_id!); setEdits({}) }}>Continuar treino iniciado</button></div>}
+      {previousInProgress && !selectedPrevious && <div className="feedback"><p>Há um treino iniciado em uma versão anterior.</p><button type="button" className="secondary-button" onClick={() => { setWeekStart(previousInProgress.week_start!); setHistoryId(previousInProgress.id); setDayId(previousInProgress.day_id!); setEdits({}) }}>Continuar treino iniciado</button></div>}
       {displayed.snapshot.importantNote && <div className="student-important-note"><strong>Antes de começar</strong><p>{displayed.snapshot.importantNote}</p></div>}
       <div className="student-week-nav" aria-label="Semana do treino">
         <button type="button" className="secondary-button" disabled={weekStart <= firstWeek} onClick={() => setWeekStart(shiftWeek(weekStart, -1))} aria-label="Semana anterior">‹</button>
@@ -408,7 +428,7 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
         <button type="button" className="secondary-button" disabled={weekStart >= lastNavigableWeek} onClick={() => setWeekStart(shiftWeek(weekStart, 1))} aria-label="Próxima semana">›</button>
       </div>
       <nav className="student-day-tabs" aria-label="Dias do treino">{displayed.snapshot.days.map((item, index) => <button key={item.id} type="button"
-        className={`${item.id === effectiveDayId ? 'is-active ' : ''}${completed(item.id) ? 'is-complete' : partial(item.id) ? 'is-partial' : ''}`} aria-current={item.id === effectiveDayId ? 'page' : undefined} onClick={() => { setDayId(item.id); setEdits({}); setExpandedExerciseId(null) }}>
+        className={`${item.id === effectiveDayId ? 'is-active ' : ''}${completed(item.id) ? 'is-complete' : partial(item.id) ? 'is-partial' : ''}`} aria-current={item.id === effectiveDayId ? 'page' : undefined} onClick={() => { setHistoryId(''); setDayId(item.id); setEdits({}); setExpandedExerciseId(null) }}>
         <span>Dia {index + 1}</span><strong>{item.name}</strong><small>{completed(item.id) ? '✓ Concluído' : partial(item.id) ? 'Encerrado incompleto' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'PAUSED') ? 'Pausado · continue quando puder' : localSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') || remoteSessions.some(row => row.day_id === item.id && row.week_start === weekStart && row.status === 'IN_PROGRESS') ? 'Em andamento' : isActiveWeek && item.id === nextDayId ? `Próximo · ${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}` : `${item.items.length} ${item.items.length === 1 ? 'exercício' : 'exercícios'}`}</small>
       </button>)}</nav>
       {day && <div className="student-day-panel"><div className="student-day-title"><div><span className="eyebrow">DIA {displayed.snapshot.days.indexOf(day) + 1}</span><h4>{day.name}</h4><p>{day.items.length} {day.items.length === 1 ? 'exercício' : 'exercícios'} · {done ? 'Concluído' : partiallyDone ? 'Encerrado incompleto' : active?.status === 'PAUSED' ? 'Pausado' : active?.status === 'IN_PROGRESS' ? 'Em andamento' : 'Pronto para começar'}</p></div></div>
@@ -423,21 +443,23 @@ export function WorkoutPlayer({ tenantId, studentId, userId }: { tenantId: strin
           const swapId = active?.exercise_swaps?.[item.id] ?? selectedRemote?.exercise_swaps?.[item.id]
           const actual = item.alternatives?.find(option => option.exerciseId === swapId)
           const videoExerciseId = actual?.exerciseId ?? item.exerciseId
-          const videoUrl = liveVideos?.versionId === displayed.id && Object.prototype.hasOwnProperty.call(liveVideos.urls, videoExerciseId)
-            ? liveVideos.urls[videoExerciseId] : actual?.videoUrl ?? item.videoUrl
+          const shared = displayedVersionId && navigator.onLine && liveExercises?.versionId === displayedVersionId ? liveExercises.items : undefined
+          const livePrescription = shared?.[videoExerciseId]
+          const displayName = livePrescription?.name ?? actual?.name ?? item.name
+          const displayInstructions = livePrescription?.instructions ?? actual?.instructions ?? item.instructions
+          const videoUrl = livePrescription ? livePrescription.videoUrl : actual ? actual.videoUrl : item.videoUrl
           const thumbnailUrl = videoUrl ? youtubeThumbnailUrl(videoUrl) : null
           const savedEntries = (active?.entries ?? selectedRemote?.entries ?? []).filter(entry => entry.itemId === item.id)
           const nextSetNumber = Array.from({ length: item.sets }, (_, number) => number + 1).find(number => !savedEntries.some(entry => entry.setNumber === number))
           const editedNumber = Number(editingEntryKey.startsWith(`${item.id}:`) ? editingEntryKey.split(':')[1] : 0)
           const visibleSetNumber = editedNumber || nextSetNumber
-          return <article key={item.id} id={`exercise-${item.id}`} className={`student-exercise-card${isPreparation ? ' is-preparation' : ''}${savedEntries.length === item.sets && (active || selectedRemote) ? ' is-complete' : ''}${deferredIds.includes(item.id) && savedEntries.length < item.sets ? ' is-deferred' : ''}`}>
-          <button type="button" className="student-exercise-toggle" aria-expanded={expanded} aria-controls={`exercise-content-${item.id}`} onClick={() => { setExpandedExerciseId(expanded ? '' : item.id); setEditingEntryKey('') }}><span className="student-exercise-number">{savedEntries.length === item.sets && (active || selectedRemote) ? '✓' : index + 1}</span><span><strong>{actual?.name ?? item.name}</strong><small>{savedEntries.length === item.sets && (active || selectedRemote) ? 'Concluído · ' : deferredIds.includes(item.id) ? 'Para fazer depois · ' : ''}{isCardio ? `Cardio · meta ${item.cardioMinutes ?? '?'} min` : isPreparation ? `Marcar como feito · ${item.reps}` : `${item.sets} ${isPreparation ? item.sets === 1 ? 'etapa' : 'etapas' : item.sets === 1 ? 'série' : 'séries'} · ${item.reps}`}</small></span><span aria-hidden="true">{expanded ? '⌃' : '⌄'}</span></button>
-          {expanded && <div id={`exercise-content-${item.id}`} className="student-exercise-body">{actual && <p className="student-swap-note">Exercício principal: {item.name}. Esta troca vale somente para este treino.</p>}{(actual?.instructions ?? item.instructions) && <p>{actual?.instructions ?? item.instructions}</p>}{item.notes && <p className="workout-item-note">{item.notes}</p>}
+          return <article key={item.id} id={`exercise-${item.id}`} className={`student-exercise-card${isPreparation ? ' is-preparation' : ''}${savedEntries.length === item.sets && (active || selectedRemote) ? ' is-complete' : ''}`}>
+          <button type="button" className="student-exercise-toggle" aria-expanded={expanded} aria-controls={`exercise-content-${item.id}`} onClick={() => { setExpandedExerciseId(expanded ? '' : item.id); setEditingEntryKey('') }}><span className="student-exercise-number">{savedEntries.length === item.sets && (active || selectedRemote) ? '✓' : index + 1}</span><span><strong>{displayName}</strong><small>{savedEntries.length === item.sets && (active || selectedRemote) ? 'Concluído · ' : ''}{isCardio ? `Cardio · meta ${item.cardioMinutes ?? '?'} min` : isPreparation ? `Marcar como feito · ${item.reps}` : `${item.sets} ${item.sets === 1 ? 'série' : 'séries'} · ${item.reps}`}</small></span><span aria-hidden="true">{expanded ? '⌃' : '⌄'}</span></button>
+          {expanded && <div id={`exercise-content-${item.id}`} className="student-exercise-body">{actual && <p className="student-swap-note">Exercício principal: {shared?.[item.exerciseId]?.name ?? item.name}. Esta troca vale somente para este treino.</p>}{displayInstructions && <p>{displayInstructions}</p>}{item.notes && <p className="workout-item-note">{item.notes}</p>}
             {isCardio && !!item.cardioSteps?.length && <details className="student-cardio-program"><summary>Ver programação do cardio</summary><ol>{item.cardioSteps.map((step, stepIndex) => <li key={stepIndex}><span>{step.startMinute}–{step.endMinute} min</span><span>{step.inclinePercent}% de inclinação</span><span>{step.speedKmh.toLocaleString('pt-BR')} km/h</span></li>)}</ol></details>}
-            {videoUrl && <div className="student-exercise-media">{thumbnailUrl && <img src={thumbnailUrl} alt={`Prévia do exercício ${actual?.name ?? item.name}`} loading="lazy" referrerPolicy="no-referrer" />}<InstructionVideo videoUrl={videoUrl} /></div>}
-            {active?.status === 'IN_PROGRESS' && !isPreparation && savedEntries.length === 0 && !!item.alternatives?.length && <div className="student-swap"><button type="button" className="secondary-button" onClick={() => setSwapOpenId(value => value === item.id ? '' : item.id)}>{actual ? 'Alterar exercício escolhido' : 'Trocar exercício neste dia'}</button>{swapOpenId === item.id && <label>Alternativa aprovada pelo personal<select value={swapId ?? ''} onChange={event => void swapExercise(item.id, event.target.value)}><option value="">Manter {item.name}</option>{item.alternatives.map(option => <option key={option.exerciseId} value={option.exerciseId}>{option.name}</option>)}</select></label>}</div>}
+            {videoUrl && <div className="student-exercise-media">{thumbnailUrl && <img src={thumbnailUrl} alt={`Prévia do exercício ${displayName}`} loading="lazy" referrerPolicy="no-referrer" />}<InstructionVideo videoUrl={videoUrl} /></div>}
+            {active?.status === 'IN_PROGRESS' && !isPreparation && savedEntries.length === 0 && !!item.alternatives?.length && <div className="student-swap"><button type="button" className="secondary-button" onClick={() => setSwapOpenId(value => value === item.id ? '' : item.id)}>{actual ? 'Alterar exercício escolhido' : 'Trocar exercício neste dia'}</button>{swapOpenId === item.id && <label>Alternativa aprovada pelo personal<select value={swapId ?? ''} onChange={event => void swapExercise(item.id, event.target.value)}><option value="">Manter {shared?.[item.exerciseId]?.name ?? item.name}</option>{item.alternatives.map(option => <option key={option.exerciseId} value={option.exerciseId}>{shared?.[option.exerciseId]?.name ?? option.name}</option>)}</select></label>}</div>}
             {active?.status === 'IN_PROGRESS' && !isPreparation && !isCardio && savedEntries.length === 0 && !item.alternatives?.length && <p className="student-swap-empty">Este exercício ainda não tem opções de troca definidas pelo seu personal. Se precisar trocar, combine uma alternativa com ele antes de registrar as séries.</p>}
-            {active?.status === 'IN_PROGRESS' && savedEntries.length < item.sets && day.items.some(row => row.id !== item.id && active.entries.filter(entry => entry.itemId === row.id).length < row.sets) && <button type="button" className="secondary-button student-defer-button" onClick={() => deferExercise(item.id)}>Fazer este exercício depois</button>}
             {active?.status === 'IN_PROGRESS' && day.id === active.day_id && isPreparation && savedEntries.length < item.sets && <button type="button" disabled={busy} onClick={() => void markPreparationDone(item.id)}>Marcar como feito</button>}
             {active?.status === 'IN_PROGRESS' && day.id === active.day_id && !isPreparation && <div className="student-entry-progress"><span>{savedEntries.length === item.sets ? 'Exercício registrado' : `${savedEntries.length} de ${item.sets} séries registradas`}</span><progress max={item.sets} value={savedEntries.length} aria-label={`Progresso de ${item.name}`} /></div>}
             {active?.status === 'IN_PROGRESS' && day.id === active.day_id && !isPreparation && visibleSetNumber && (() => {

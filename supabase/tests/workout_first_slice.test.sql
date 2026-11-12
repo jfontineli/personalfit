@@ -9,6 +9,7 @@ from (values
   ('11111111-1111-4111-8111-111111111101'::uuid,'coach-a@workout.invalid'),
   ('11111111-1111-4111-8111-111111111102'::uuid,'student-a1@workout.invalid'),
   ('11111111-1111-4111-8111-111111111103'::uuid,'student-a2@workout.invalid'),
+  ('11111111-1111-4111-8111-111111111104'::uuid,'unlinked@workout.invalid'),
   ('22222222-2222-4222-8222-222222222201'::uuid,'coach-b@workout.invalid'),
   ('22222222-2222-4222-8222-222222222202'::uuid,'student-b@workout.invalid')
 ) x(id,email);
@@ -71,6 +72,7 @@ update public.workout_plans set draft=jsonb_set(draft,'{days}',(draft->'days') |
   '[{"id":"11111111-dddd-4ddd-8ddd-ddddddddddd2","name":"Day B","items":[{"id":"11111111-1111-4111-8111-111111111198","exerciseId":"11111111-eeee-4eee-8eee-eeeeeeeeeee1","sets":1,"reps":"8"}]}]'::jsonb)
   where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11';
 select is(public.publish_workout_plan('11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11') is not null,true,'coach A publishes A1 plan');
+select set_config('fixture.first_version',(select id::text from public.workout_plan_versions where version_number=1),true);
 select is((select count(*) from public.workout_assignments where student_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),1::bigint,'publication assigns A1');
 select is((select snapshot->>'guidance' from public.workout_plan_versions where plan_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11'),
   'Keep breathing','student guidance is published');
@@ -148,12 +150,12 @@ select throws_ok($$select public.sync_workout_session('11111111-ffff-4fff-8fff-f
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111103',true);
 select is((select count(*) from public.workout_plan_versions),0::bigint,'A2 cannot read A1 version');
 select throws_ok($$select public.sync_workout_day_session('11111111-ffff-4fff-8fff-ffffffffffa5','11111111-cccc-4ccc-8ccc-cccccccccca5',
-  (select id from public.workout_plan_versions limit 1),1,'[]'::jsonb,'IN_PROGRESS',
+  current_setting('fixture.first_version')::uuid,1,'[]'::jsonb,'IN_PROGRESS',
   '11111111-dddd-4ddd-8ddd-ddddddddddd1','2026-11-02')$$,'42501',null,'A2 cannot inspect A1 day');
 select is((select count(*) from public.student_service_plans),0::bigint,'A2 cannot read A1 service agreement');
 select is((select count(*) from public.workout_sessions),0::bigint,'A2 cannot read A1 session');
 select throws_ok($$select public.sync_workout_session('11111111-ffff-4fff-8fff-fffffffffff2','11111111-cccc-4ccc-8ccc-ccccccccccc2',
-  (select id from public.workout_plan_versions limit 1),1,'[]'::jsonb,'IN_PROGRESS')$$,'42501',null,'A2 cannot write A1 version');
+  current_setting('fixture.first_version')::uuid,1,'[]'::jsonb,'IN_PROGRESS')$$,'42501',null,'A2 cannot write A1 version');
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222201',true);
 select is((select count(*) from public.workout_plan_versions),0::bigint,'coach B cannot read A1 version');
 select is((select count(*) from public.student_service_plans),0::bigint,'coach B cannot read A service agreement');
@@ -165,7 +167,15 @@ update public.exercise_library set video_url = 'storage:11111111-0000-4000-8000-
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111101',true);
 select is(public.can_delete_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeee9.mp4'),true,'coach can remove unpublished video');
+reset role;
+insert into public.exercise_library(id,tenant_id,name,muscle_group,video_url) values
+  ('11111111-eeee-4eee-8eee-eeeeeeeeeeaf','11111111-0000-4000-8000-000000000001','Alternative fixture','PEITO','storage:11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeeaf/11111111-eeee-4eee-8eee-eeeeeeeeeeaf.mp4'),
+  ('11111111-eeee-4eee-8eee-eeeeeeeeeeae','11111111-0000-4000-8000-000000000001','Unassigned fixture','PEITO',null);
+set local role authenticated;
+update public.workout_plans set draft=jsonb_set(draft,'{days,0,items,0,alternativeExerciseIds}','["11111111-eeee-4eee-8eee-eeeeeeeeeeaf"]')
+where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11';
 select is(public.publish_workout_plan('11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11') is not null,true,'coach publishes a new version');
+select is(public.can_delete_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeeaf/11111111-eeee-4eee-8eee-eeeeeeeeeeaf.mp4'),false,'snapshot protects video used only by an alternative');
 select is(public.can_delete_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeee9.mp4'),false,'published video cannot be deleted');
 select is(public.can_access_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeee9.mp4',true),true,'coach can upload own video');
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
@@ -188,18 +198,70 @@ select is((select video_url from public.student_exercise_videos('11111111-aaaa-4
   (select version_id from public.workout_assignments order by assigned_at desc limit 1)) limit 1),
   'storage:11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeeea.mp4',
   'A1 sees current video without republishing');
+reset role;
+-- Transaction timestamps tie in this fixture. Establish a known latest assignment.
+select set_config('fixture.version2',(select id::text from public.workout_plan_versions where plan_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaa11' and version_number=2),true);
+update public.workout_assignments set assigned_at=assigned_at - interval '1 minute'
+where student_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1' and version_id<>current_setting('fixture.version2')::uuid;
+insert into public.workout_plan_versions(id,tenant_id,plan_id,version_number,snapshot,published_by)
+select '11111111-eeee-4eee-8eee-eeeeeeeeeeae',tenant_id,plan_id,100,snapshot,published_by from public.workout_plan_versions where id=current_setting('fixture.version2')::uuid;
+update public.exercise_library set name='Exercise renamed live', instructions='Live instructions for all assigned students.'
+  where id='11111111-eeee-4eee-8eee-eeeeeeeeeee1';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
+select is((select name from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+  (select version_id from public.workout_assignments order by assigned_at desc limit 1))
+  where exercise_id='11111111-eeee-4eee-8eee-eeeeeeeeeee1'),'Exercise renamed live',
+  'A1 sees current exercise name without republishing');
+select is((select instructions from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+  (select version_id from public.workout_assignments order by assigned_at desc limit 1))
+  where exercise_id='11111111-eeee-4eee-8eee-eeeeeeeeeee1'),'Live instructions for all assigned students.',
+  'A1 sees current exercise instructions without republishing');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid) where exercise_id='11111111-eeee-4eee-8eee-eeeeeeeeeeaf'),1::bigint,'approved alternative included');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid) where exercise_id='11111111-eeee-4eee-8eee-eeeeeeeeeeae'),0::bigint,'unprescribed library exercise excluded');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1','11111111-eeee-4eee-8eee-eeeeeeeeeeae')),0::bigint,'existing never-assigned version denied');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',(select id from public.workout_plan_versions where version_number=1))),0::bigint,'prior assignment receives snapshot only');
+set local role anon;
+select throws_ok($$select * from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)$$,'42501',null,'anonymous lacks execute');
+reset role;
+delete from public.workout_plan_versions where id='11111111-eeee-4eee-8eee-eeeeeeeeeeae';
+savepoint inactive_membership;
+update public.tenant_memberships set active=false where user_id='11111111-1111-4111-8111-111111111102';
+set local role authenticated;
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)),0::bigint,'inactive membership denied');
+rollback to inactive_membership;
+savepoint missing_membership;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111104',true);
+set local role authenticated;
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)),0::bigint,'authenticated account without membership denied');
+rollback to missing_membership;
+savepoint inactive_profile;
+update public.user_profiles set active=false where user_id='11111111-1111-4111-8111-111111111102';
+set local role authenticated;
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)),0::bigint,'inactive profile denied');
+rollback to inactive_profile;
+set local role authenticated;
+select isnt((select snapshot#>>'{days,0,items,0,name}' from public.workout_plan_versions where version_number=2),
+  'Exercise renamed live','live edit does not rewrite the historical snapshot');
 select is(public.can_access_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeeea.mp4',false),true,
   'A1 can read current private video without republishing');
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111103',true);
 select is(public.can_access_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeee9.mp4',false),false,'A2 cannot read A1 video');
 select is((select count(*) from public.student_exercise_videos('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
-  (select version_id from public.workout_assignments where student_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1' limit 1))),0::bigint,
+  current_setting('fixture.version2')::uuid)),0::bigint,
   'A2 cannot resolve A1 current media');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+  current_setting('fixture.version2')::uuid)),0::bigint,
+  'A2 cannot resolve A1 current exercise content');
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222201',true);
 select is(public.can_access_exercise_video('11111111-0000-4000-8000-000000000001/11111111-eeee-4eee-8eee-eeeeeeeeeee1/11111111-eeee-4eee-8eee-eeeeeeeeeee9.mp4',false),false,'coach B cannot read A video');
 select is((select count(*) from public.student_exercise_videos('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
-  (select version_id from public.workout_assignments where student_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1' limit 1))),0::bigint,
+  current_setting('fixture.version2')::uuid)),0::bigint,
   'B cannot resolve A current media');
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222202',true);
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)),0::bigint,'other tenant student denied using known version');
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111101',true);
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',current_setting('fixture.version2')::uuid)),0::bigint,'professional without student relationship denied');
 
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111101',true);
 update public.workout_plans set draft = jsonb_set(jsonb_set(jsonb_set(jsonb_set(draft,
@@ -314,15 +376,19 @@ select is((select snapshot#>>'{days,0,items,0,recordingStyle}' from public.worko
   null,'legacy snapshot remains without recording style');
 
 reset role;
+select set_config('fixture.latest',(select version_id::text from public.workout_assignments where student_id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1' order by assigned_at desc,id desc limit 1),true);
 update public.students set status='INACTIVE' where id='11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111102',true);
 select is((select count(*) from public.workout_plan_versions),0::bigint,'inactive A1 loses version access');
 select is((select count(*) from public.student_exercise_videos('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
-  (select id from public.workout_plan_versions where version_number=4))),0::bigint,
+  current_setting('fixture.latest')::uuid)),0::bigint,
   'inactive A1 cannot resolve current media');
+select is((select count(*) from public.student_exercise_content('11111111-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+  current_setting('fixture.latest')::uuid)),0::bigint,
+  'inactive A1 cannot resolve current exercise content');
 select throws_ok($$select public.sync_workout_session('11111111-ffff-4fff-8fff-fffffffffff3','11111111-cccc-4ccc-8ccc-ccccccccccc1',
-  (select id from public.workout_plan_versions limit 1),2,'[]'::jsonb,'COMPLETED')$$,'42501',null,'inactive A1 cannot sync');
+  current_setting('fixture.first_version')::uuid,2,'[]'::jsonb,'COMPLETED')$$,'42501',null,'inactive A1 cannot sync');
 
 select * from finish();
 rollback;

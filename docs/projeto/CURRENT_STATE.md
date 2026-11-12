@@ -1,8 +1,12 @@
-# Estado atual — referência de 10/11/2026
+# Estado atual — referência de 11/11/2026
 
 ## HEAD APROVADO
 
-**CONFIRMADO** — Base da auditoria aprovada: `main`, `076ef45e1fc02479c1b20143ecda96b8d449cd17` (08/11). A referência local `origin/main` coincidia com HEAD. A aprovação é da auditoria. O SHA por si só não atesta deploy ou aprovação de testes. O HEAD contém identidade, espaços/marca, treino versionado com execução offline, biblioteca e mídia, alimentação individual e painel do personal.
+**CONFIRMADO** — Baseline documental e de agentes: `main`, `29239a5ac0a9083223b847cb04b3084ceeeb79fb` (10/11). O commit torna o bootstrap reproduzível no HEAD e está um commit à frente da referência local `origin/main`. O SHA por si só não atesta deploy.
+
+## TRABALHO LOCAL NÃO COMMITADO
+
+**TRABALHO LOCAL VALIDADO** — O ADR 0021, a migration de 09/11, o player, editor, serviço, estilo, pgTAP, E2E e documentação permanecem sem commit. Nome, instrução e vídeo atuais são resolvidos somente para a versão atual atribuída e aberta; sessões de versão anterior ou terminais usam o snapshot completo. O fluxo linear remove o adiamento isolado, preserva pausa e alternativa aprovada e mantém a versão original após republicação.
 
 ## PUBLICADO EM TESTE
 
@@ -14,8 +18,8 @@
 
 ## RISCOS ABERTOS
 
-Prioridades: cache privado após negação, coerência perfil/vínculo, versão de sessão histórica remota e preservação de mídia. Filas, confirmação alimentar, segurança do alvo E2E e cobertura da CI também têm lacunas. Cada condição de encerramento está em [dívida aberta](TECH_DEBT.md). **NECESSITA VALIDAÇÃO HUMANA** — tratamento das revisões Git e cópias anteriores que contêm informações identificáveis.
+Prioridades: cache privado após negação e coerência perfil/vínculo. Filas, confirmação alimentar, segurança do alvo E2E e cobertura da CI também têm lacunas. Cada condição de encerramento está em [dívida aberta](TECH_DEBT.md). **NECESSITA VALIDAÇÃO HUMANA** — tratamento das revisões Git e cópias anteriores que contêm informações identificáveis.
 
 ## ÚLTIMA VALIDAÇÃO
 
-**CONFIRMADO** — Auditoria estática em 10/11 e conferência documental nesta preparação. Os resultados executáveis anteriores têm data e escopo em [testes](TESTING.md).
+**CONFIRMADO localmente** — Em 10–11/11, a árvore funcional passou por lint, 20 testes Vitest, build PWA, replay e seed em Supabase descartável separado, 278 verificações pgTAP e oito jornadas Playwright. Nenhuma publicação remota foi realizada. Veja [testes](TESTING.md).

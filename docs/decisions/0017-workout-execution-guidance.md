@@ -15,6 +15,7 @@ O treino prescrito deve continuar sob autoria do personal. Na academia, um apare
 - Após registrar uma série, o descanso prescrito aparece em contagem regressiva. Som e vibração são tentados quando o navegador permitir. A interface mostra a série seguinte e abre automaticamente o próximo exercício quando o atual termina.
 - Referências opcionais de carga e repetições que sobrariam são editadas pelo personal e congeladas na versão publicada. O aluno vê essas referências e a última carga registrada, sem preenchimento automático do seu resultado.
 - A sequência de dias pode ser feita em qualquer dia da semana vigente; a interface não pressupõe que o aluno treinou no dia civil anterior. Sessões encerradas permanecem no histórico. Repetição do mesmo dia na mesma semana exige decisão futura.
+- A execução segue a ordem prescrita e não oferece adiamento isolado de exercício. Quando um aparelho estiver indisponível, o aluno usa uma alternativa aprovada para aquela sessão; se precisar interromper o treino, pausa a sessão inteira para continuar depois.
 
 ## Consequências
 

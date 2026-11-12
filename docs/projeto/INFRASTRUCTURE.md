@@ -14,7 +14,7 @@ Em 02/11 houve aplicação inicial de 21 migrations em teste. Em 03/11 foram apl
 
 ## DESCONHECIDO — estado remoto atual
 
-SHA implantado, ledger efetivo de migrations, configuração Auth/SMTP/MFA, grants efetivos no Cloud, restauração dos objetos e funcionamento do gatilho GitHub → Pages precisam de evidência operacional recente. Disponibilidade do shell não valida login, autorização, Storage ou sync autenticados.
+SHA implantado, ledger efetivo de migrations, configuração Auth/SMTP/MFA, grants efetivos no Cloud, restauração dos objetos e funcionamento do gatilho GitHub → Pages precisam de evidência operacional recente. A migration de 09/11 foi validada somente em stack local descartável e permanece sem publicação. Disponibilidade do shell não valida login, autorização, Storage ou sync autenticados.
 
 ## Recuperação e produção
 

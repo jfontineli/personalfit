@@ -1,6 +1,6 @@
 # Banco e migrations
 
-**CONFIRMADO** — PostgreSQL é a fonte consolidada. A configuração local usa PostgreSQL 17. Na base de 10/11 há 37 migrations rastreadas entre 20260929000000 e 20261104030000. O DDL declara 26 tabelas de aplicação, todas com RLS habilitada. O catálogo remoto requer verificação separada.
+**CONFIRMADO** — PostgreSQL é a fonte consolidada. A configuração local usa PostgreSQL 17. Na base de 10/11 há 37 migrations rastreadas entre 20260929000000 e 20261104030000 e uma migration local de 09/11. O DDL declara 26 tabelas de aplicação, todas com RLS habilitada. O catálogo remoto requer verificação separada.
 
 | Grupo | Tabelas |
 |---|---|
@@ -12,6 +12,8 @@
 Membership é única por tenant/usuário. O enum app_role serve à identidade administrativa; a membership usa papel textual com CHECK. FKs compostas vinculam recursos ao mesmo tenant. Há unicidade de conta e email do aluno no espaço, versão por plano, convite aberto e atribuição nutricional ativa. Índices apoiam biblioteca, sessões por semana, indicadores e leitura de versões recentes. O índice por sessão/dia/semana não impõe unicidade por dia.
 
 Triggers criam perfil e plano padrão, propagam estados de vínculo, auditam alterações selecionadas e validam publicação/execução. Rascunhos usam JSONB; publicação congela versões com autor, número e data. Sessões referenciam versão; recibos identificam replay e conflito de conteúdo. Alimentação mantém eventos por versão e operação. Conteúdo clínico passa por RPCs com verificação de atribuição.
+
+**DECISÃO APROVADA · migration local validada** — [20261109000000](../../supabase/migrations/20261109000000_live_exercise_content.sql) cria student_exercise_content sem alterar versões, sessões ou atribuições. A função SECURITY DEFINER fixa search_path, qualifica objetos, restringe EXECUTE e valida identidade, perfil, membership ALUNO, aluno ativo, plano do tenant, versão mais recente atribuída e exercícios principais/alternativas. A mesma migration amplia a proteção de exclusão para mídia presente somente em alternativa publicada.
 
 ## Evolução
 

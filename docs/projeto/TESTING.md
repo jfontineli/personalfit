@@ -18,11 +18,12 @@ Execute na raiz com Node 24 e dependências instaladas por npm ci.
 
 O pgTAP cobre identidade, superadmin, convite, A/B entre tenants e entre alunos, acesso suspenso, treino, mídia privada, publicação/versionamento, sessão, idempotência, nutrição, dupla atuação e notas individuais. Há suítes que pressupõem o seed e suítes que montam fixtures em transação. Os E2E atravessam cadastro, marca, nutrição, publicação e registro offline com reconexão. A ausência de fixtures ou variáveis pode pular casos.
 
-**PENDENTE** — Usar IDs válidos de fixtures, inclusive entre tenants, para provar a barreira do recurso. Incluir versão histórica em segundo dispositivo, concorrência, revogação e proteção de mídia alternativa na validação dos respectivos reparos.
+**CONFIRMADO localmente em 10–11/11/2026** — O E2E percorre o fluxo linear sem adiamento, conteúdo atual, alternativa, offline, sessão terminal pelo snapshot e retomada da versão original após republicação em instalação limpa. O pgTAP usa IDs conhecidos e cobre versão atual atribuída, versão anterior e nunca atribuída, exercício externo, alternativa, anônimo, colega, outro tenant, profissional, conta sem vínculo e perfil, vínculo ou aluno inativo. A proteção de mídia principal e alternativa também foi exercitada.
 
 ## RESULTADOS HISTÓRICOS
 
 - **HISTÓRICO · 03/11/2026** — Registro de pgTAP de nutrição (29 verificações) e dupla atuação (15), com jornadas locais de publicação e leitura. Suítes legadas dependiam de fixtures ausentes no banco preservado.
 - **HISTÓRICO · 04–05/11/2026** — Rodada isolada de guias/cardio registrou 101 verificações pgTAP, 14 testes unitários e build. Uma rodada E2E registrou seis aprovações, um pulo e timeout no cenário extenso de treino. Houve validação humana de um fluxo em celular, sem comprovar áudio em segundo plano.
+- **CONFIRMADO localmente · 10–11/11/2026** — Em stack Supabase descartável separada: replay completo e seed, 278 verificações pgTAP e oito jornadas Playwright. Com Node 24: lint, 20 testes Vitest e build PWA aprovados. O bundle foi conferido contra a URL e a chave pública da stack antes do E2E.
 
-**DESCONHECIDO** — Resultado integral atual em ambiente limpo. Nesta preparação documental não foram executados testes de aplicação. [Workflow](../../.github/workflows/ci.yml) · [pgTAP](../../supabase/tests) · [Playwright](../../apps/web/e2e)
+**DESCONHECIDO** — Estado remoto e comportamento em aparelho físico após esta alteração local. [Workflow](../../.github/workflows/ci.yml) · [pgTAP](../../supabase/tests) · [Playwright](../../apps/web/e2e)

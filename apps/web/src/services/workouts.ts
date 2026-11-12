@@ -4,6 +4,7 @@ export type MuscleGroup = 'MOBILIDADE' | 'PEITO' | 'COSTAS' | 'OMBROS' | 'BRACOS
 export type WorkoutGuideKey = 'COMO_USAR' | 'EXECUCAO' | 'HIPOPRESSIVO' | 'ACOMPANHAMENTO' | 'GLOSSARIO' | 'ACESSORIOS' | 'INDICACOES' | 'CONTATO'
 export type CardioStep = { startMinute: number; endMinute: number; inclinePercent: number; speedKmh: number }
 export type Exercise = { id: string; tenant_id: string; name: string; instructions: string; video_url: string | null; muscle_group: MuscleGroup }
+export type StudentExerciseContent = { name: string; instructions: string; videoUrl: string | null }
 export type DraftItem = { id: string; exerciseId: string; alternativeExerciseIds?: string[]; sets: number; reps: string; loadHintKg?: number; rirHint?: string; cardioMinutes?: number; cardioSteps?: CardioStep[]; targetKind?: 'REPS' | 'TIME'; recordingStyle?: 'SERIES' | 'PREPARATION' | 'CARDIO'; notes?: string; restSeconds?: number; setLabels?: string[] }
 export type DraftDay = { id: string; name: string; items: DraftItem[] }
 export type WorkoutDraft = { guidance?: string; guides?: Partial<Record<WorkoutGuideKey, string>>; importantNote?: string; startsOn?: string; durationWeeks?: number; reviewRequired?: boolean; days: DraftDay[] }
@@ -101,7 +102,7 @@ export async function publishWorkoutPlan(planId: string): Promise<string> {
   return result(data, error) as string
 }
 export async function getCurrentWorkout(tenantId: string, studentId: string): Promise<{ assignment: WorkoutAssignment; version: WorkoutVersion } | null> {
-  const { data, error } = await client().from('workout_assignments').select('id,tenant_id,student_id,version_id,assigned_at').eq('tenant_id', tenantId).eq('student_id', studentId).order('assigned_at', { ascending: false }).limit(1).maybeSingle()
+  const { data, error } = await client().from('workout_assignments').select('id,tenant_id,student_id,version_id,assigned_at').eq('tenant_id', tenantId).eq('student_id', studentId).order('assigned_at', { ascending: false }).order('id', { ascending: false }).limit(1).maybeSingle()
   const assignment = result(data, error) as WorkoutAssignment | null
   if (!assignment) return null
   const response = await client().from('workout_plan_versions').select('id,tenant_id,plan_id,version_number,snapshot,published_at').eq('id', assignment.version_id).single()
@@ -115,6 +116,11 @@ export async function getStudentExerciseVideos(studentId: string, versionId: str
   const { data, error } = await client().rpc('student_exercise_videos', { p_student_id: studentId, p_version_id: versionId })
   return Object.fromEntries((result(data ?? [], error) as { exercise_id: string; video_url: string | null }[])
     .map(row => [row.exercise_id, row.video_url]))
+}
+export async function getStudentExerciseContent(studentId: string, versionId: string): Promise<Record<string, StudentExerciseContent>> {
+  const { data, error } = await client().rpc('student_exercise_content', { p_student_id: studentId, p_version_id: versionId })
+  return Object.fromEntries((result(data ?? [], error) as { exercise_id: string; name: string; instructions: string; video_url: string | null }[])
+    .map(row => [row.exercise_id, { name: row.name, instructions: row.instructions, videoUrl: row.video_url }]))
 }
 export async function listWorkoutSessions(tenantId: string, studentId: string): Promise<WorkoutSession[]> {
   const { data, error } = await client().from('workout_sessions').select('id,tenant_id,student_id,version_id,day_id,week_start,revision,entries,status,started_at,updated_at,client_started_at,client_finished_at,elapsed_seconds,exercise_swaps,exercise_issues').eq('tenant_id', tenantId).eq('student_id', studentId).order('started_at', { ascending: false }).limit(80)

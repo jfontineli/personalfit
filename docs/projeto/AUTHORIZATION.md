@@ -14,6 +14,8 @@
 | Autenticado com convite | Ativação individual | Validar token, expiração, uso único e email confirmado da conta. O convite não transfere poderes de superadmin. |
 | Anônimo, outro tenant ou outro aluno | Recursos privados | Negar escrita e negar leitura ou retornar conjunto vazio conforme o contrato. |
 
+**DECISÃO APROVADA · trabalho local validado** — A RPC do ADR 0021 restringe os campos atuais aos exercícios presentes na versão mais recente atribuída ao próprio aluno, inclusive alternativas congeladas. Não concede leitura da biblioteca. O pgTAP usa IDs válidos conhecidos para negar colega do mesmo tenant, outro tenant, profissional, anônimo, conta sem vínculo, perfil ou vínculo inativo e versão nunca atribuída.
+
 ## Revisão
 
 Conferir USING e WITH CHECK, grants por coluna, execução de SECURITY DEFINER e perfil/membership/aluno/plano inativos. Exercitar Tenant A contra Tenant B, Aluno A contra Aluno B no mesmo espaço e profissional sem atribuição clínica. Revalidar essas barreiras ao reativar cadastros e ao usar dados locais após perda de acesso.
