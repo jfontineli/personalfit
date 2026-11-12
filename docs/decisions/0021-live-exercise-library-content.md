@@ -1,7 +1,7 @@
 # ADR 0021 — Conteúdo atual da biblioteca na experiência ativa
 
 - Data: 2026-11-09
-- Status: **DECISÃO APROVADA; implementação local validada**
+- Status: **DECISÃO APROVADA; implementação publicada em TESTE e validada localmente**
 
 ## Contexto
 

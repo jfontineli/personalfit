@@ -8,7 +8,7 @@
 - O logout principal remove sessão/contexto, mas preserva cópias de domínio e pendências. Em dispositivo compartilhado, segregação lógica não equivale a apagar dados. A política de retenção deve proteger privacidade e permitir recuperar registros ainda sem confirmação.
 - Algumas policies usam membership ativa sem repetir o teste de perfil. A ativação por convite de aluno e a propagação de status podem produzir estados incoerentes. O helper tenant_access_allowed revela um booleano comercial a authenticated por UUID. Ver [matriz](AUTHORIZATION.md) e [critérios de correção](TECH_DEBT.md).
 - IndexedDB guarda sessão Auth e conteúdo privado. Cache Storage destina-se ao shell da PWA. localStorage registra som, vibração e escolha do ciclo alimentar associada a usuário/aluno/dia.
-- O conteúdo compartilhado local do ADR 0021 restringe a consulta a itens e alternativas da versão atual atribuída. Sessões terminais ou de versão anterior usam o snapshot completo; essa seleção foi validada localmente em instalação limpa.
+- O conteúdo compartilhado do ADR 0021 restringe a consulta a itens e alternativas da versão atual atribuída. Sessões terminais ou de versão anterior usam o snapshot completo; essa seleção foi validada localmente em instalação limpa. No remoto de TESTE, a rota negou anônimo; as demais identidades não foram repetidas sem fixture fictícia segura.
 
 ## Storage e mídia
 
@@ -17,7 +17,7 @@
 | brand-logos | PNG/JPEG/WebP até 2 MiB, tenantUUID/arquivoUUID.ext. Membros autorizados leem; profissional autorizado envia/remove no espaço. |
 | exercise-videos | MP4 até 25 MiB, tenantUUID/exercicioUUID/arquivoUUID.mp4. Profissional autorizado gerencia; aluno lê mídia principal ou alternativa prescrita. |
 
-A aplicação baixa os objetos com autenticação e usa URL de objeto temporária. YouTube e miniaturas usam serviço externo. A migration local protege contra exclusão tanto a mídia principal quanto a mídia presente somente em alternativa publicada. MIME e tamanho são controlados; inspeção binária no servidor permanece **PENDENTE**.
+A aplicação baixa os objetos com autenticação e usa URL de objeto temporária. YouTube e miniaturas usam serviço externo. A migration presente no ledger de TESTE protege contra exclusão tanto a mídia principal quanto a mídia presente somente em alternativa publicada; o comportamento foi exercitado no banco local descartável. MIME e tamanho são controlados; inspeção binária no servidor permanece **PENDENTE**.
 
 ## Memória, logs e cópias
 

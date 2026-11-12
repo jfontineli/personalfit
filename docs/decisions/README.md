@@ -33,6 +33,6 @@ Os ADRs 0001 a 0008 foram registrados em 2026-09-29; os ADRs 0009 a 0011, em 202
 - 0009 complementa 0007 e prioriza a biblioteca do espaço e a autoria do profissional.
 - 0016 complementa 0015 com dupla atuação mediante atribuição individual.
 - 0018 restringe a interação de 0017 quando não há alternativa aprovada e preserva o contrato histórico de ocorrências.
-- 0021 amplia 0013 para nome e instruções atuais, mantendo o versionamento de 0005. A implementação foi validada localmente em banco descartável e permanece sem publicação.
+- 0021 amplia 0013 para nome e instruções atuais, mantendo o versionamento de 0005. A implementação foi validada localmente e publicada no ambiente remoto de TESTE em 11/11/2026; o cenário autenticado integral não foi repetido no remoto por ausência de fixture fictícia documentada.
 
 Para saber o que chegou a cada ambiente, consulte [estado atual](../projeto/CURRENT_STATE.md) e [infraestrutura](../projeto/INFRASTRUCTURE.md).

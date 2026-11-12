@@ -2,15 +2,15 @@
 
 ## HEAD APROVADO
 
-**CONFIRMADO** — Baseline documental e de agentes: `main`, `29239a5ac0a9083223b847cb04b3084ceeeb79fb` (10/11). O commit torna o bootstrap reproduzível no HEAD e está um commit à frente da referência local `origin/main`. O SHA por si só não atesta deploy.
+**CONFIRMADO** — `main` e `origin/main` apontam para `d8f040f555aa239a17e3b314f5c46e7e1a48d587`, que contém o checkpoint agent-ready `29239a5` e a implementação do ADR 0021. O workflow GitHub do push concluiu com sucesso.
 
-## TRABALHO LOCAL NÃO COMMITADO
+## ADR 0021
 
-**TRABALHO LOCAL VALIDADO** — O ADR 0021, a migration de 09/11, o player, editor, serviço, estilo, pgTAP, E2E e documentação permanecem sem commit. Nome, instrução e vídeo atuais são resolvidos somente para a versão atual atribuída e aberta; sessões de versão anterior ou terminais usam o snapshot completo. O fluxo linear remove o adiamento isolado, preserva pausa e alternativa aprovada e mantém a versão original após republicação.
+**CONFIRMADO no código e schema de TESTE; comportamento autenticado validado localmente** — Nome, instrução e vídeo atuais são resolvidos somente para a versão atual atribuída e aberta; sessões de versão anterior ou terminais usam o snapshot completo. O fluxo linear remove o adiamento isolado, preserva pausa e alternativa aprovada e mantém a versão original após republicação. O cenário autenticado integral não foi repetido no remoto por ausência de fixture fictícia documentada.
 
 ## PUBLICADO EM TESTE
 
-**CONFIRMADO** — Na auditoria pública de 10/11, Pages respondeu HTTP 200 e apontou para assets diferentes dos do build local. **HISTÓRICO** — Há registro de migrations remotas até `20261104030000` e deploy direto do frontend de teste. **DESCONHECIDO** — SHA servido e ledger remoto atuais. Consulte a [evidência operacional](INFRASTRUCTURE.md).
+**CONFIRMADO · 11/11/2026** — O Supabase `PersonalFit Teste` tem ledger coincidente com as 38 migrations locais, inclusive `20261109000000`, que já estava aplicada quando verificada. O Pages de TESTE serve o SHA `d8f040f` pelo deployment `2b9f102b-cac4-45d6-b5d2-d5fad3d38c11`; o domínio canônico entrega o bundle `index-C3GZEETU.js`, manifest e service worker. Consulte a [evidência operacional](INFRASTRUCTURE.md).
 
 ## PLANEJADO
 
@@ -22,4 +22,4 @@ Prioridades: cache privado após negação e coerência perfil/vínculo. Filas, 
 
 ## ÚLTIMA VALIDAÇÃO
 
-**CONFIRMADO localmente** — Em 10–11/11, a árvore funcional passou por lint, 20 testes Vitest, build PWA, replay e seed em Supabase descartável separado, 278 verificações pgTAP e oito jornadas Playwright. Nenhuma publicação remota foi realizada. Veja [testes](TESTING.md).
+**CONFIRMADO** — Em 10–11/11, a árvore funcional passou por lint, 20 testes Vitest, build PWA, replay e seed em Supabase descartável separado, 278 verificações pgTAP e oito jornadas Playwright. Após o deploy, o Pages, SPA, login, manifest, service worker e assets responderam; rotas profissional e aluno permaneceram protegidas sem sessão. Auth remoto respondeu, a RPC negou anônimo e os buckets continuaram privados. Veja [testes](TESTING.md).

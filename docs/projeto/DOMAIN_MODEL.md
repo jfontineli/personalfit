@@ -11,6 +11,6 @@
 | Alimentação | Registro do nutricionista e atribuição ao aluno delimitam autoria. Rascunho, versões publicadas, notas individuais e eventos de refeição têm escopo clínico próprio. |
 | Acompanhamento | O personal consulta indicadores e sessões do espaço. Auditoria registra metadados de ações selecionadas. |
 
-**DECISÃO APROVADA · trabalho local validado** — A versão preserva o conteúdo da publicação. A experiência aberta da versão atual atribuída pode apresentar nome, instruções gerais e vídeo atuais da biblioteca sem reescrever o snapshot. Sessões terminais ou de versão anterior usam os três campos do snapshot, e séries executadas conservam a versão original. [ADR 0021](../decisions/0021-live-exercise-library-content.md)
+**DECISÃO APROVADA · implementação publicada em TESTE e validada localmente** — A versão preserva o conteúdo da publicação. A experiência aberta da versão atual atribuída pode apresentar nome, instruções gerais e vídeo atuais da biblioteca sem reescrever o snapshot. Sessões terminais ou de versão anterior usam os três campos do snapshot, e séries executadas conservam a versão original. [ADR 0021](../decisions/0021-live-exercise-library-content.md)
 
 **PENDENTE** — Modelo versionado de anamnese, medidas e frequência consolidada. Consulte [contexto](PROJECT_CONTEXT.md) e [autorização](AUTHORIZATION.md).
